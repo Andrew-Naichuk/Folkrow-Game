@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isometric City Builder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="sidebar">
+            <h2>City Builder</h2>
+            <div class="tool-section">
+                <h3>Buildings</h3>
+                <div class="tool-grid" id="buildings-grid">
+                    <!-- Dynamically populated from itemData -->
+                </div>
+            </div>
+            <div class="tool-section">
+                <h3>Decorations</h3>
+                <div class="tool-grid" id="decorations-grid">
+                    <!-- Dynamically populated from itemData -->
+                </div>
+            </div>
+            <div class="tool-section">
+                <h3>Roads</h3>
+                <div class="tool-grid" id="roads-grid">
+                    <!-- Dynamically populated from itemData -->
+                </div>
+            </div>
+            <div class="tool-section">
+                <h3>Tools</h3>
+                <div class="tool-grid">
+                    <div class="tool-item" data-type="tool" data-id="bulldozer">
+                        <div class="tool-preview bulldozer-preview">💣</div>
+                        <span>Annihilate</span>
+                    </div>
+                </div>
+            </div>
+            <div class="tool-section">
+                <button id="add-budget-btn" class="add-budget-btn">Add ⍱1000</button>
+                <button id="clear-btn" class="clear-btn">Clear All</button>
+            </div>
+        </div>
+        <div class="canvas-container">
+            <canvas id="gameCanvas"></canvas>
+            <div class="info-panel">
+                <div id="cursor-info">Click to place items</div>
+            </div>
+            <div class="stats-panel">
+                <div id="budget-display" class="stat-item budget-display">Budget: ⍱10,000</div>
+                <div id="population-display" class="stat-item population-display">Population: 0</div>
+                <div id="unemployed-display" class="stat-item unemployed-display">Unemployed: 0</div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
+
+

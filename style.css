@@ -1,0 +1,464 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: #1a1a2e;
+    color: #eee;
+    overflow: hidden;
+}
+
+.game-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+.sidebar {
+    width: 250px;
+    background: #16213e;
+    padding: 20px;
+    overflow-y: auto;
+    border-right: 2px solid #0f3460;
+    transition: opacity 0.2s ease;
+}
+
+/* When tool is selected, disable interaction with sidebar except tool items */
+.sidebar.tool-selected {
+    pointer-events: none;
+}
+
+.sidebar.tool-selected .tool-item {
+    pointer-events: auto;
+}
+
+.sidebar h2 {
+    color: #e94560;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 24px;
+    text-shadow: 2px 2px 0px #000;
+}
+
+.stats-panel {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(15, 52, 96, 0.95);
+    padding: 12px 16px;
+    border-radius: 6px;
+    border: 2px solid #16213e;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 180px;
+    backdrop-filter: blur(4px);
+}
+
+.stat-item {
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.budget-display {
+    background: transparent;
+    padding: 8px;
+    margin-bottom: 0;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #4ade80;
+    border: none;
+    border-radius: 4px;
+    box-shadow: none;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.population-display {
+    color: #60a5fa;
+}
+
+.budget-display.low-budget {
+    color: #f87171;
+    animation: pulse 1s infinite;
+}
+
+.budget-display.income-update {
+    background: rgba(26, 77, 122, 0.8);
+    border: 2px solid #4ade80;
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
+    transform: scale(1.05);
+    animation: budgetPulse 0.6s ease-out;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes budgetPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 20px rgba(74, 222, 128, 0.7);
+    }
+    100% {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
+    }
+}
+
+.income-indicator {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #4ade80;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: incomeFloat 1s ease-out forwards;
+    text-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
+    z-index: 101;
+}
+
+@keyframes incomeFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px);
+    }
+}
+
+.tool-section {
+    margin-bottom: 25px;
+}
+
+.tool-section h3 {
+    color: #0f3460;
+    margin-bottom: 10px;
+    font-size: 16px;
+    border-bottom: 1px solid #0f3460;
+    padding-bottom: 5px;
+}
+
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.tool-item {
+    background: #0f3460;
+    border: 2px solid #16213e;
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    border-radius: 4px;
+}
+
+.tool-item:hover {
+    background: #1a4d7a;
+    border-color: #e94560;
+    transform: scale(1.05);
+}
+
+.tool-item.active {
+    background: #e94560;
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+}
+
+.tool-item span {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #eee;
+}
+
+.tool-item .tool-cost {
+    display: block;
+    margin-top: 3px;
+    font-size: 11px;
+    color: #4ade80;
+    font-weight: bold;
+}
+
+.tool-item.active .tool-cost {
+    color: #fff;
+}
+
+.tool-preview {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.tool-preview-canvas {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.canvas-container {
+    flex: 1;
+    position: relative;
+    background: #041628;
+    overflow: hidden;
+}
+
+#gameCanvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    cursor: crosshair;
+}
+
+.info-panel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 12px;
+    border: 1px solid #0f3460;
+}
+
+.add-budget-btn {
+    width: 100%;
+    padding: 10px;
+    background: #0f3460;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+}
+
+.add-budget-btn:hover {
+    background: #1a4d7a;
+    transform: scale(1.05);
+}
+
+.add-budget-btn:active {
+    transform: scale(0.95);
+}
+
+.clear-btn {
+    width: 100%;
+    padding: 10px;
+    background: #e94560;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.clear-btn:hover {
+    background: #c7364f;
+    transform: scale(1.05);
+}
+
+.clear-btn:active {
+    transform: scale(0.95);
+}
+
+/* Pixel art preview styles */
+.house1-preview {
+    background: linear-gradient(135deg, #8b4513 0%, #654321 50%, #8b4513 100%);
+    position: relative;
+}
+
+.house1-preview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 12px solid #8b0000;
+}
+
+.house2-preview {
+    background: linear-gradient(135deg, #4682b4 0%, #2f4f4f 50%, #4682b4 100%);
+    position: relative;
+}
+
+.house2-preview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 15px solid #2f4f4f;
+}
+
+.tower-preview {
+    background: linear-gradient(135deg, #696969 0%, #2f2f2f 50%, #696969 100%);
+    position: relative;
+}
+
+.tower-preview::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    background: #ffd700;
+    border-radius: 50%;
+}
+
+.shop-preview {
+    background: linear-gradient(135deg, #daa520 0%, #b8860b 50%, #daa520 100%);
+    position: relative;
+}
+
+.shop-preview::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 8px;
+    height: 8px;
+    background: #ff6347;
+}
+
+.tree-preview {
+    background: #228b22;
+    position: relative;
+}
+
+.tree-preview::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background: #32cd32;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+}
+
+.tree-preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 8px;
+    background: #8b4513;
+}
+
+.rock-preview {
+    background: #708090;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+.bush-preview {
+    background: #2d5016;
+    border-radius: 50%;
+    position: relative;
+}
+
+.bush-preview::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    background: #3d6b1f;
+    border-radius: 50%;
+}
+
+.lamp-preview {
+    background: #2f2f2f;
+    position: relative;
+}
+
+.lamp-preview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 12px;
+    background: #ffd700;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}
+
+/* Road preview styles */
+.road-basic-preview {
+    background: #4a4a4a;
+    position: relative;
+}
+
+.road-dirt-preview {
+    background: #8b7355;
+    position: relative;
+}
+
+.road-stone-preview {
+    background: #a0a0a0;
+    position: relative;
+    background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 6px, rgba(0,0,0,0.1) 6px, rgba(0,0,0,0.1) 7px),
+        repeating-linear-gradient(90deg, transparent, transparent 6px, rgba(0,0,0,0.1) 6px, rgba(0,0,0,0.1) 7px);
+}
+
+.road-highway-preview {
+    background: #2a2a2a;
+    position: relative;
+}
