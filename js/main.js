@@ -7,7 +7,6 @@ import { MouseHandler } from './input/MouseHandler.js';
 import { KeyboardHandler } from './input/KeyboardHandler.js';
 import { ToolSelector } from './ui/ToolSelector.js';
 import { ClearButton } from './ui/ClearButton.js';
-import { AddBudgetButton } from './ui/AddBudgetButton.js';
 import { StatsPanel } from './ui/StatsPanel.js';
 import { SpriteManager } from './utils/SpriteManager.js';
 import { BUILDING_DATA, DECORATION_DATA, ROAD_DATA } from './data/itemData.js';
@@ -58,7 +57,6 @@ class Game {
         
         // Initialize UI
         this.toolSelector = new ToolSelector(this.gameState, this.renderer, this.mouseHandler, this.spriteManager);
-        this.addBudgetButton = new AddBudgetButton(this.gameState, this.renderer);
         this.clearButton = new ClearButton(this.gameState, this.renderer);
         this.statsPanel = new StatsPanel(this.gameState, this.renderer);
         

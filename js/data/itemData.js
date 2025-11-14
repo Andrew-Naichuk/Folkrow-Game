@@ -22,13 +22,13 @@ export const BUILDING_DATA = {
         name: 'House',
         color: '#8b4513', 
         roofColor: '#8b0000', 
-        height: 20, 
+        height: 18, 
         width: 1,
-        cost: 200,
+        cost: 300,
         demolitionCostMultiplier: 0.5,
-        sprite: 'sprites/house1.png', // Optional: path to sprite file (PNG or WebP)
-        offsetY: 0, // Vertical offset for sprite positioning
-        population: 2 // Adds 2 villagers to the population
+        sprite: 'sprites/house1.png',
+        offsetY: 0,
+        population: 2
     },
     house2: { 
         name: 'House 2',
@@ -36,11 +36,82 @@ export const BUILDING_DATA = {
         roofColor: '#2f4f4f', 
         height: 20, 
         width: 1,
-        cost: 400,
+        cost: 500,
         demolitionCostMultiplier: 0.5,
-        sprite: 'sprites/house2.png', // Optional: path to sprite file
-        offsetY: 0, // Vertical offset for sprite positioning
-        population: 4 // Adds 4 villagers to the population
+        sprite: 'sprites/house2.png',
+        offsetY: 0,
+        population: 4
+    },
+    timberman: {
+        name: 'Timberman',
+        color: '#8b4513',
+        roofColor: '#b8860b',
+        height: 20,
+        width: 1,
+        cost: 1000,
+        demolitionCostMultiplier: 0.5,
+        incomeAmount: 10,
+        incomeInterval: 5000,
+        unemployedRequired: 2,
+        sprite: 'sprites/timberman.png',
+        offsetY: 0,
+    },
+    blacksmith: { 
+        name: 'Blacksmith',
+        color: '#2f2f2f', 
+        roofColor: '#1a1a1a', 
+        height: 20, 
+        width: 1,
+        cost: 1850,
+        demolitionCostMultiplier: 0.5,
+        sprite: 'sprites/blacksmith.png',
+        offsetY: 0,
+        incomeAmount: 20,
+        incomeInterval: 5000,
+        allowAdjacentPlacement: true,
+        unemployedRequired: 4
+    },
+    wheat: {
+        name: 'Wheat',
+        color: '#f0e68c',
+        roofColor: '#ddaa00',
+        height: 15,
+        width: 1,
+        cost: 100,
+        demolitionCostMultiplier: 0.5,
+        sprite: 'sprites/wheat.png',
+        incomeAmount: 5,
+        incomeInterval: 5000,
+        unemployedRequired: 1,
+        offsetY: 6,
+        allowAdjacentPlacement: true
+    },
+    shop: { 
+        name: 'Shop',
+        color: '#daa520', 
+        roofColor: '#b8860b', 
+        height: 20, 
+        width: 1,
+        cost: 650,
+        demolitionCostMultiplier: 0.5,
+        sprite: 'sprites/shop.png',
+        offsetY: 5,
+        incomeAmount: 7,
+        incomeInterval: 5000,
+        allowAdjacentPlacement: true,
+        unemployedRequired: 1
+    },
+    campfire: { 
+        name: 'Campfire',
+        color: '#8b4513', 
+        roofColor: '#ff4500', 
+        height: 20, 
+        width: 1,
+        cost: 50,
+        demolitionCostMultiplier: 0.5,
+        sprite: 'sprites/campfire.png',
+        offsetY: 10,
+        allowAdjacentPlacement: true
     },
     well: { 
         name: 'Well',
@@ -50,51 +121,9 @@ export const BUILDING_DATA = {
         width: 1,
         cost: 100,
         demolitionCostMultiplier: 0.5,
-        sprite: 'sprites/well.png', // Optional: path to sprite file
-        offsetY: 4, // Vertical offset for sprite positioning
+        sprite: 'sprites/well.png',
+        offsetY: 4,
         allowAdjacentPlacement: true
-    },
-    shop: { 
-        name: 'Shop',
-        color: '#daa520', 
-        roofColor: '#b8860b', 
-        height: 20, 
-        width: 1,
-        cost: 800,
-        demolitionCostMultiplier: 0.5,
-        sprite: 'sprites/shop.png', // Optional: path to sprite file
-        offsetY: 5, // Vertical offset for sprite positioning
-        incomeAmount: 5, // Income generated per interval
-        incomeInterval: 5000, // Interval in milliseconds (5 seconds)
-        allowAdjacentPlacement: true,
-        unemployedRequired: 1 // Requires 1 unemployed villager to build
-    },
-    campfire: { 
-        name: 'Campfire',
-        color: '#8b4513', 
-        roofColor: '#ff4500', 
-        height: 20, 
-        width: 1,
-        cost: 150,
-        demolitionCostMultiplier: 0.5,
-        sprite: 'sprites/campfire.png', // Optional: path to sprite file
-        offsetY: 10, // Vertical offset for sprite positioning
-        allowAdjacentPlacement: true
-    },
-    blacksmith: { 
-        name: 'Blacksmith',
-        color: '#2f2f2f', 
-        roofColor: '#1a1a1a', 
-        height: 20, 
-        width: 1,
-        cost: 2000,
-        demolitionCostMultiplier: 0.5,
-        sprite: 'sprites/blacksmith.png', // Optional: path to sprite file
-        offsetY: 0, // Vertical offset for sprite positioning
-        incomeAmount: 12, // Income generated per interval
-        incomeInterval: 5000, // Interval in milliseconds (5 seconds)
-        allowAdjacentPlacement: true,
-        unemployedRequired: 3 // Requires 3 unemployed villagers to build
     }
 };
 
@@ -120,35 +149,54 @@ export const DECORATION_DATA = {
         topColor: '#32cd32', 
         trunkColor: '#8b4513', 
         size: 12,
-        cost: 100,
+        cost: 20,
+        offsetY: -8,
         demolitionCostMultiplier: 0.5,
-        // sprite: 'sprites/tree.png' // Optional: path to sprite file
+        allowAdjacentPlacement: true,
+        sprite: 'sprites/tree.png'
     },
-    rock: { 
-        name: 'Rock',
+    pine: { 
+        name: 'Pine Tree',
         color: '#708090', 
         size: 8,
-        cost: 50,
+        cost: 45,
+        offsetY: -8,
         demolitionCostMultiplier: 0.5,
-        // sprite: 'sprites/rock.png' // Optional: path to sprite file
+        allowAdjacentPlacement: true,
+        sprite: 'sprites/pine.png'
     },
     bush: { 
         name: 'Bush',
         color: '#2d5016', 
         topColor: '#3d6b1f', 
         size: 10,
-        cost: 75,
+        cost: 15,
         demolitionCostMultiplier: 0.5,
-        // sprite: 'sprites/bush.png' // Optional: path to sprite file
+        allowAdjacentPlacement: true,
+        offsetY: 5,
+        sprite: 'sprites/bush.png'
     },
     lamp: { 
         name: 'Lamp',
         color: '#2f2f2f', 
         lightColor: '#ffd700', 
         size: 6,
-        cost: 150,
+        cost: 75,
         demolitionCostMultiplier: 0.5,
-        // sprite: 'sprites/lamp.png' // Optional: path to sprite file
+        allowAdjacentPlacement: true,
+        offsetY: 5,
+        sprite: 'sprites/lamp.png'
+    },
+    bench: {
+        name: 'Bench',
+        color: '#8b4513',
+        topColor: '#b8860b',
+        size: 10,
+        cost: 120,
+        demolitionCostMultiplier: 0.5,
+        allowAdjacentPlacement: true,
+        offsetY: 5,
+        sprite: 'sprites/bench.png'
     }
 };
 
@@ -166,49 +214,27 @@ export const DECORATION_DATA = {
 //   - offsetY: Vertical offset for sprite positioning (default: -1 for roads)
 //   - allowAdjacentPlacement: If true, allows placing items of the same type/id next to each other (default: false)
 export const ROAD_DATA = {
-    basic: { 
-        name: 'Basic Road',
-        color: '#4a4a4a', 
-        lineColor: '#ffffff', 
-        pattern: 'solid',
-        cost: 200,
-        demolitionCostMultiplier: 0.5,
-        offsetY: 0, // Vertical offset for sprite positioning
-        allowAdjacentPlacement: true
-        // sprite: 'sprites/road_basic.png' // Optional: path to sprite file
-    },
     dirt: { 
-        name: 'Dirt Road',
+        name: 'Dirt',
         color: '#8b7355', 
         lineColor: '#6b5d3f', 
         pattern: 'dirt',
-        cost: 100,
+        cost: 10,
         demolitionCostMultiplier: 0.5,
-        offsetY: 0, // Vertical offset for sprite positioning
+        offsetY: 0,
         allowAdjacentPlacement: true
         // sprite: 'sprites/road_dirt.png' // Optional: path to sprite file
     },
     stone: { 
-        name: 'Stone Road',
+        name: 'Stone',
         color: '#a0a0a0', 
         lineColor: '#808080', 
         pattern: 'stone',
-        cost: 300,
+        cost: 50,
         demolitionCostMultiplier: 0.5,
-        offsetY: 0, // Vertical offset for sprite positioning
+        offsetY: 0,
         allowAdjacentPlacement: true
         // sprite: 'sprites/road_stone.png' // Optional: path to sprite file
-    },
-    highway: { 
-        name: 'Highway',
-        color: '#2a2a2a', 
-        lineColor: '#ffd700', 
-        pattern: 'highway',
-        cost: 500,
-        demolitionCostMultiplier: 0.5,
-        offsetY: 0, // Vertical offset for sprite positioning
-        allowAdjacentPlacement: true
-        // sprite: 'sprites/road_highway.png' // Optional: path to sprite file
     }
 };
 
