@@ -391,7 +391,7 @@ export class GameState {
 
     /**
      * Find a random tree on the map
-     * @returns {{isoX: number, isoY: number}|null} Random tree position or null if no trees found
+     * @returns {Object|null} Random tree item object or null if no trees found
      */
     findRandomTree() {
         const trees = this.placedItems.filter(item => 
@@ -403,7 +403,7 @@ export class GameState {
         }
         
         const randomTree = trees[Math.floor(Math.random() * trees.length)];
-        return { isoX: randomTree.isoX, isoY: randomTree.isoY };
+        return randomTree;
     }
 
     /**
@@ -520,15 +520,30 @@ export class GameState {
     }
 
     /**
-     * Calculate total expenses per interval from all placed buildings
+     * Get expense data for an item (building or road)
+     * @param {string} type - Item type
+     * @param {string} id - Item ID
+     * @returns {number|null} Expense amount or null if item doesn't have expenses
+     */
+    getItemExpenseData(type, id) {
+        if (type === 'building' && BUILDING_DATA[id] && BUILDING_DATA[id].expenseAmount) {
+            return BUILDING_DATA[id].expenseAmount;
+        } else if (type === 'road' && ROAD_DATA[id] && ROAD_DATA[id].expenseAmount) {
+            return ROAD_DATA[id].expenseAmount;
+        }
+        return null;
+    }
+
+    /**
+     * Calculate total expenses per interval from all placed buildings and roads
      * @returns {number} Total expenses per interval
      */
     getTotalExpensesPerInterval() {
         let totalExpenses = 0;
         
         this.placedItems.forEach(item => {
-            if (item.type === 'building') {
-                const expenseAmount = this.getBuildingExpenseData(item.id);
+            if (item.type === 'building' || item.type === 'road') {
+                const expenseAmount = this.getItemExpenseData(item.type, item.id);
                 if (expenseAmount !== null) {
                     totalExpenses += expenseAmount;
                 }

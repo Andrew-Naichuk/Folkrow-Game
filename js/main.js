@@ -61,14 +61,14 @@ class Game {
         this.clearButton = new ClearButton(this.gameState, this.renderer);
         this.statsPanel = new StatsPanel(this.gameState, this.renderer);
         
-        // Start income generation system
-        this.startIncomeGeneration();
+        // Initialize income generation system (now integrated into game loop)
+        this.initializeIncomeGeneration();
         
         // Start environment events system
         this.startEnvironmentEvents();
         
         // Initialize game loop timing
-        this.lastFrameTime = Date.now();
+        this.lastFrameTime = performance.now();
         
         // Start game loop
         this.gameLoop();
@@ -103,64 +103,71 @@ class Game {
     }
 
     /**
-     * Start the income generation and expense system
+     * Initialize the income generation and expense system
      * Buildings with incomeAmount property generate income at the universal interval defined in CONFIG
      * Buildings with expenseAmount property incur expenses at the same interval
+     * This is now integrated into the game loop using delta time for frame-rate independence
      */
-    startIncomeGeneration() {
+    initializeIncomeGeneration() {
         // Create income generators for each building type that generates income
-        const incomeGenerators = new Map();
+        this.incomeGenerators = new Map();
         
         // Find all buildings that generate income
         Object.keys(BUILDING_DATA).forEach(buildingId => {
             const incomeData = this.gameState.getBuildingIncomeData(buildingId);
             if (incomeData) {
-                incomeGenerators.set(buildingId, incomeData);
+                this.incomeGenerators.set(buildingId, incomeData);
             }
         });
         
         // Use the universal interval from config
-        const incomeInterval = CONFIG.INCOME_GENERATION_INTERVAL;
+        this.incomeInterval = CONFIG.INCOME_GENERATION_INTERVAL;
         
-        // Track last processing time for both income and expenses
-        let lastProcessed = 0;
+        // Track accumulated time for income/expense processing
+        this.incomeAccumulatedTime = 0;
+    }
+
+    /**
+     * Process income generation and expenses based on accumulated delta time
+     * This is called from the game loop to ensure frame-rate independence
+     * @param {number} deltaTime - Time elapsed since last frame in milliseconds
+     */
+    processIncomeGeneration(deltaTime) {
+        // Accumulate time
+        this.incomeAccumulatedTime += deltaTime;
         
-        setInterval(() => {
-            const now = Date.now();
+        // Process when interval is reached
+        if (this.incomeAccumulatedTime >= this.incomeInterval) {
+            const placedItems = this.gameState.getPlacedItems();
             
-            // Only process if enough time has passed (ensures both income and expenses are processed together)
-            if (now - lastProcessed >= incomeInterval) {
-                const placedItems = this.gameState.getPlacedItems();
-                
-                // Process income generation
-                if (incomeGenerators.size > 0) {
-                    incomeGenerators.forEach((incomeData, buildingId) => {
-                        // Count buildings of this type
-                        const buildingCount = placedItems.filter(item => 
-                            item.type === 'building' && item.id === buildingId
-                        ).length;
+            // Process income generation
+            if (this.incomeGenerators.size > 0) {
+                this.incomeGenerators.forEach((incomeData, buildingId) => {
+                    // Count buildings of this type
+                    const buildingCount = placedItems.filter(item => 
+                        item.type === 'building' && item.id === buildingId
+                    ).length;
+                    
+                    if (buildingCount > 0) {
+                        const totalIncome = buildingCount * incomeData.amount;
+                        this.gameState.addBudget(totalIncome);
                         
-                        if (buildingCount > 0) {
-                            const totalIncome = buildingCount * incomeData.amount;
-                            this.gameState.addBudget(totalIncome);
-                            
-                            // Trigger budget display animation
-                            this.statsPanel.animateUpdate(totalIncome);
-                        }
-                    });
-                }
-                
-                // Process expenses (maintenance costs) - always processed together with income
-                const totalExpenses = this.gameState.getTotalExpensesPerInterval();
-                if (totalExpenses > 0) {
-                    // Deduct expenses from budget (can go negative)
-                    this.gameState.addBudget(-totalExpenses);
-                }
-                
-                // Update last processed time
-                lastProcessed = now;
+                        // Trigger budget display animation
+                        this.statsPanel.animateUpdate(totalIncome);
+                    }
+                });
             }
-        }, incomeInterval);
+            
+            // Process expenses (maintenance costs) - always processed together with income
+            const totalExpenses = this.gameState.getTotalExpensesPerInterval();
+            if (totalExpenses > 0) {
+                // Deduct expenses from budget (can go negative)
+                this.gameState.addBudget(-totalExpenses);
+            }
+            
+            // Reset accumulated time, but keep any overflow to maintain precision
+            this.incomeAccumulatedTime -= this.incomeInterval;
+        }
     }
 
     /**
@@ -198,10 +205,13 @@ class Game {
     }
 
     gameLoop() {
-        // Calculate delta time
-        const currentTime = Date.now();
+        // Calculate delta time using performance.now() for better precision
+        const currentTime = performance.now();
         const deltaTime = currentTime - this.lastFrameTime;
         this.lastFrameTime = currentTime;
+        
+        // Process income generation and expenses (frame-rate independent)
+        this.processIncomeGeneration(deltaTime);
         
         // Update camera based on keyboard input
         this.camera.update(this.keyboardHandler.getKeys());

@@ -27,6 +27,9 @@ export class MouseHandler {
         // Get sidebar reference for UI interaction control
         this.sidebar = document.querySelector('.sidebar');
         
+        // AbortController for cleanup of global event listeners
+        this.abortController = new AbortController();
+        
         this.setupEventListeners();
         this.setupGlobalMouseTracking();
     }
@@ -60,7 +63,7 @@ export class MouseHandler {
                 // Render to update preview position
                 this.renderer.render();
             }
-        });
+        }, { signal: this.abortController.signal });
     }
     
     /**
@@ -333,8 +336,7 @@ export class MouseHandler {
                         }
                     }
                     
-                    const cost = this.gameState.getItemCost(item.type, item.id);
-                    const demolitionCost = Math.floor(cost / 2);
+                    const demolitionCost = this.gameState.getDemolitionCost(item.type, item.id);
                     const budget = this.gameState.getBudget();
                     
                     if (budget < demolitionCost) {
@@ -453,6 +455,19 @@ export class MouseHandler {
         } else {
             this.canvas.style.cursor = 'grab';
             this.customCursor.style.display = 'none';
+        }
+    }
+    
+    /**
+     * Cleanup method to remove event listeners and prevent memory leaks
+     */
+    destroy() {
+        // Abort all event listeners using AbortController
+        this.abortController.abort();
+        
+        // Remove custom cursor element from DOM
+        if (this.customCursor && this.customCursor.parentNode) {
+            this.customCursor.parentNode.removeChild(this.customCursor);
         }
     }
 }

@@ -23,7 +23,8 @@ export class KeyboardHandler {
     }
 
     setupEventListeners() {
-        window.addEventListener('keydown', (e) => {
+        // Store bound event handlers so they can be removed later
+        this.keydownHandler = (e) => {
             this.keys[e.key] = true;
             
             // Handle Escape key to cancel tool selection
@@ -39,11 +40,14 @@ export class KeyboardHandler {
                     this.renderer.render();
                 }
             }
-        });
+        };
 
-        window.addEventListener('keyup', (e) => {
+        this.keyupHandler = (e) => {
             this.keys[e.key] = false;
-        });
+        };
+
+        window.addEventListener('keydown', this.keydownHandler);
+        window.addEventListener('keyup', this.keyupHandler);
     }
 
     /**
@@ -66,6 +70,21 @@ export class KeyboardHandler {
 
     isKeyPressed(key) {
         return !!this.keys[key];
+    }
+
+    /**
+     * Cleanup method to remove event listeners and prevent memory leaks
+     */
+    destroy() {
+        if (this.keydownHandler) {
+            window.removeEventListener('keydown', this.keydownHandler);
+            this.keydownHandler = null;
+        }
+        
+        if (this.keyupHandler) {
+            window.removeEventListener('keyup', this.keyupHandler);
+            this.keyupHandler = null;
+        }
     }
 }
 

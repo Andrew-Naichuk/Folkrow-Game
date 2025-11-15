@@ -152,6 +152,7 @@ export const DECORATION_DATA = {
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
         sprite: 'sprites/tree.png',
+        hoverMessage: 'Can fall on itself, requires a woodcutter or timberman to remove',
         resource: "wood"
     },
     pine: { 
@@ -162,6 +163,7 @@ export const DECORATION_DATA = {
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
         sprite: 'sprites/pine.png',
+        hoverMessage: 'Can fall on itself, requires a woodcutter or timberman to remove',
         resource: "wood"
     },
     stump: { 
