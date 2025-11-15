@@ -268,37 +268,84 @@ export class ToolSelector {
     showInfoPanel(toolItem, itemData) {
         if (!this.infoPanel || !itemData) return;
 
+        // Get type and id from toolItem
+        const type = toolItem.dataset.type;
+        const id = toolItem.dataset.id;
+
         // Build the content
         let content = `<div class="info-panel-title">${itemData.name || 'Unknown Item'}</div>`;
         
+        let hasContentAfterTitle = false;
+        
+        // Helper function to add divider between sections
+        const addDivider = () => {
+            content += `<div class="info-panel-divider-light"></div>`;
+        };
+        
         // Description (if available)
         if (itemData.description) {
+            if (hasContentAfterTitle) addDivider();
             content += `<div class="info-panel-row"><span class="info-value-description">${itemData.description}</span></div>`;
+            hasContentAfterTitle = true;
         }
         
         // Cost
         if (itemData.cost !== undefined) {
+            if (hasContentAfterTitle) addDivider();
             content += `<div class="info-panel-row"><span class="info-label">Cost:</span><span class="info-value">⍱${itemData.cost}</span></div>`;
+            hasContentAfterTitle = true;
         }
         
-        // Income
+        // Requirements (if any) - dynamically display all requirement types
+        if (itemData.requires) {
+            const requirementsCheck = this.gameState.checkRequirements(type, id);
+            const requirements = itemData.requires;
+            const missing = requirementsCheck.missing;
+            const checkers = this.gameState.getRequirementCheckers();
+            
+            if (hasContentAfterTitle) addDivider();
+            content += `<div class="info-panel-row" style="margin-top: 4px; padding-top: 8px;"><span class="info-label" style="font-weight: 700;">Requirements:</span></div>`;
+            
+            // Display all requirements dynamically
+            for (const [reqType, requiredValue] of Object.entries(requirements)) {
+                const checker = checkers[reqType];
+                if (checker) {
+                    const result = checker(requiredValue);
+                    const isMet = !missing || !missing[reqType];
+                    const statusClass = isMet ? 'info-value' : 'info-value requirement-not-met';
+                    const statusText = isMet ? '✓' : '✗';
+                    content += `<div class="info-panel-requirement-row"><span class="info-label">${result.label}:</span><span class="${statusClass}">${statusText} ${result.current} / ${result.required}</span></div>`;
+                } else {
+                    // Fallback for unknown requirement types
+                    const isMet = !missing || !missing[reqType];
+                    const statusClass = isMet ? 'info-value' : 'info-value requirement-not-met';
+                    const statusText = isMet ? '✓' : '✗';
+                    const label = reqType.charAt(0).toUpperCase() + reqType.slice(1);
+                    content += `<div class="info-panel-requirement-row"><span class="info-label">${label}:</span><span class="${statusClass}">${statusText} ${requiredValue}</span></div>`;
+                }
+            }
+            hasContentAfterTitle = true;
+        }
+        
+        // Income, Expense, and Population - grouped together with light dividers between them
+        const financialRows = [];
         if (itemData.incomeAmount !== undefined && itemData.incomeAmount > 0) {
-            content += `<div class="info-panel-row"><span class="info-label">Income:</span><span class="info-value income">⍱${itemData.incomeAmount} / interval</span></div>`;
+            financialRows.push(`<div class="info-panel-row"><span class="info-label">Income:</span><span class="info-value income">⍱${itemData.incomeAmount} / interval</span></div>`);
         }
-        
-        // Expense
         if (itemData.expenseAmount !== undefined && itemData.expenseAmount > 0) {
-            content += `<div class="info-panel-row"><span class="info-label">Expense:</span><span class="info-value expense">⍱${itemData.expenseAmount} / interval</span></div>`;
+            financialRows.push(`<div class="info-panel-row"><span class="info-label">Expense:</span><span class="info-value expense">⍱${itemData.expenseAmount} / interval</span></div>`);
         }
-        
-        // Workers needed
-        if (itemData.unemployedRequired !== undefined && itemData.unemployedRequired > 0) {
-            content += `<div class="info-panel-row"><span class="info-label">Workers Needed:</span><span class="info-value">${itemData.unemployedRequired}</span></div>`;
-        }
-        
-        // Population (for houses)
         if (itemData.population !== undefined && itemData.population > 0) {
-            content += `<div class="info-panel-row"><span class="info-label">Houses:</span><span class="info-value">${itemData.population} villagers</span></div>`;
+            financialRows.push(`<div class="info-panel-row"><span class="info-label">Houses:</span><span class="info-value">${itemData.population} villagers</span></div>`);
+        }
+        
+        if (financialRows.length > 0) {
+            if (hasContentAfterTitle) addDivider();
+            // Add dividers between financial rows
+            for (let i = 0; i < financialRows.length; i++) {
+                if (i > 0) addDivider();
+                content += financialRows[i];
+            }
         }
 
         this.infoPanel.innerHTML = content;

@@ -14,7 +14,7 @@
 //   - incomeAmount: Optional income generated per interval (for income-generating buildings)
 //   - expenseAmount: Optional maintenance cost per interval (for buildings that require maintenance)
 //   - allowAdjacentPlacement: If true, allows placing items of the same type/id next to each other (default: false)
-//   - unemployedRequired: Optional number of unemployed villagers required to build this building (default: 0)
+//   - requires: Optional requirements object (e.g., { population: 10, unemployedPopulation: 3 })
 export const BUILDING_DATA = {
     house1: { 
         name: 'Basic house',
@@ -38,7 +38,10 @@ export const BUILDING_DATA = {
         sprite: 'sprites/house2.png',
         offsetY: 0,
         population: 4,
-        expenseAmount: 3
+        expenseAmount: 3,
+        requires: {
+            population: 10,
+        }
     },
     timberman: {
         name: 'Timberman',
@@ -49,9 +52,11 @@ export const BUILDING_DATA = {
         demolitionCostMultiplier: 0.5,
         incomeAmount: 14,
         expenseAmount: 5,
-        unemployedRequired: 3,
         sprite: 'sprites/timberman.png',
         offsetY: 0,
+        requires: {
+            unemployedPopulation: 3,
+        }
     },
     blacksmith: { 
         name: 'Blacksmith',
@@ -64,7 +69,9 @@ export const BUILDING_DATA = {
         offsetY: 0,
         incomeAmount: 26,
         expenseAmount: 9,
-        unemployedRequired: 4
+        requires: {
+            unemployedPopulation: 4
+        }
     },
     wheat: {
         name: 'Wheat',
@@ -76,9 +83,11 @@ export const BUILDING_DATA = {
         sprite: 'sprites/wheat.png',
         incomeAmount: 3,
         expenseAmount: 1,
-        unemployedRequired: 1,
         offsetY: 4,
-        allowAdjacentPlacement: true
+        allowAdjacentPlacement: true,
+        requires: {
+            unemployedPopulation: 1
+        }
     },
     shop: { 
         name: 'Shop',
@@ -92,7 +101,9 @@ export const BUILDING_DATA = {
         incomeAmount: 9,
         expenseAmount: 3,
         allowAdjacentPlacement: true,
-        unemployedRequired: 2
+        requires: {
+            unemployedPopulation: 2
+        }
     },
     woodcutter: { 
         name: 'Woodcutter',
@@ -104,7 +115,9 @@ export const BUILDING_DATA = {
         sprite: 'sprites/woodcutter.png',
         offsetY: 7,
         expenseAmount: 0.5,
-        unemployedRequired: 1
+        requires: {
+            unemployedPopulation: 1
+        }
     },
     campfire: { 
         name: 'Campfire',

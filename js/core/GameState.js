@@ -155,6 +155,92 @@ export class GameState {
     }
 
     /**
+     * Requirement checkers - maps requirement type to a checker function
+     * Each checker returns { met: boolean, current: value, required: value, label: string }
+     * Extend this object to add new requirement types
+     */
+    getRequirementCheckers() {
+        return {
+            population: (required) => ({
+                met: this.population >= required,
+                current: this.population,
+                required: required,
+                label: 'Population'
+            }),
+            budget: (required) => ({
+                met: this.budget >= required,
+                current: this.budget,
+                required: required,
+                label: 'Budget'
+            }),
+            unemployedPopulation: (required) => ({
+                met: this.unemployedPopulation >= required,
+                current: this.unemployedPopulation,
+                required: required,
+                label: 'Workers'
+            })
+            // Add more requirement types here as needed
+            // Example:
+            // specificBuilding: (required) => ({
+            //     met: this.hasBuilding(required),
+            //     current: this.countBuildings(required),
+            //     required: 1,
+            //     label: `${required} building`
+            // })
+        };
+    }
+
+    /**
+     * Check if requirements are met for placing an item
+     * Supports all item types (building, decoration, road) and any requirement type
+     * @param {string} type - Item type
+     * @param {string} id - Item ID
+     * @returns {{met: boolean, missing: Object}} Object with 'met' boolean and 'missing' requirements object
+     */
+    checkRequirements(type, id) {
+        let itemData = null;
+        if (type === 'building' && BUILDING_DATA[id]) {
+            itemData = BUILDING_DATA[id];
+        } else if (type === 'decoration' && DECORATION_DATA[id]) {
+            itemData = DECORATION_DATA[id];
+        } else if (type === 'road' && ROAD_DATA[id]) {
+            itemData = ROAD_DATA[id];
+        }
+
+        if (!itemData || !itemData.requires) {
+            return { met: true, missing: null };
+        }
+
+        const requirements = itemData.requires;
+        const missing = {};
+        const checkers = this.getRequirementCheckers();
+
+        // Check each requirement type dynamically
+        for (const [reqType, requiredValue] of Object.entries(requirements)) {
+            const checker = checkers[reqType];
+            if (checker) {
+                const result = checker(requiredValue);
+                if (!result.met) {
+                    missing[reqType] = result;
+                }
+            } else {
+                // Unknown requirement type - block placement since we can't verify it's met
+                console.warn(`Unknown requirement type: ${reqType} for item ${type}:${id} - blocking placement`);
+                missing[reqType] = {
+                    met: false,
+                    current: 'unknown',
+                    required: requiredValue,
+                    label: reqType.charAt(0).toUpperCase() + reqType.slice(1)
+                };
+            }
+        }
+
+        // Check if any requirements are missing
+        const met = Object.keys(missing).length === 0;
+        return { met, missing: met ? null : missing };
+    }
+
+    /**
      * Place an item at the specified position
      * @param {number} isoX - Isometric X coordinate
      * @param {number} isoY - Isometric Y coordinate
@@ -174,12 +260,20 @@ export class GameState {
             return false;
         }
         
-        // Check if building requires unemployed villagers (check before deducting cost)
-        if (type === 'building' && BUILDING_DATA[id] && BUILDING_DATA[id].unemployedRequired) {
-            const required = BUILDING_DATA[id].unemployedRequired;
-            if (this.unemployedPopulation < required) {
-                return false;
-            }
+        // Check if item has requirements that must be met
+        const requirementsCheck = this.checkRequirements(type, id);
+        if (!requirementsCheck.met) {
+            return false;
+        }
+        
+        // Get item data to check for unemployedPopulation requirement
+        let itemData = null;
+        if (type === 'building' && BUILDING_DATA[id]) {
+            itemData = BUILDING_DATA[id];
+        } else if (type === 'decoration' && DECORATION_DATA[id]) {
+            itemData = DECORATION_DATA[id];
+        } else if (type === 'road' && ROAD_DATA[id]) {
+            itemData = ROAD_DATA[id];
         }
         
         // Deduct cost and place item
@@ -195,14 +289,14 @@ export class GameState {
         });
         
         // Add population if this is a house
-        if (type === 'building' && BUILDING_DATA[id] && BUILDING_DATA[id].population) {
-            this.population += BUILDING_DATA[id].population;
-            this.unemployedPopulation += BUILDING_DATA[id].population; // New population is unemployed by default
+        if (type === 'building' && itemData && itemData.population) {
+            this.population += itemData.population;
+            this.unemployedPopulation += itemData.population; // New population is unemployed by default
         }
         
-        // Handle building placement - convert unemployed villagers to workers if required
-        if (type === 'building' && BUILDING_DATA[id] && BUILDING_DATA[id].unemployedRequired) {
-            const required = BUILDING_DATA[id].unemployedRequired;
+        // Handle item placement - convert unemployed villagers to workers if required
+        if (itemData && itemData.requires && itemData.requires.unemployedPopulation) {
+            const required = itemData.requires.unemployedPopulation;
             // Convert required number of unemployed villagers to workers
             this.unemployedPopulation = Math.max(0, this.unemployedPopulation - required);
         }
@@ -286,9 +380,18 @@ export class GameState {
             this.unemployedPopulation = Math.max(0, this.unemployedPopulation - BUILDING_DATA[item.id].population);
         }
         
-        // Handle building demolition - restore unemployed villagers (only if there's population left)
-        if (item.type === 'building' && BUILDING_DATA[item.id] && BUILDING_DATA[item.id].unemployedRequired) {
-            const required = BUILDING_DATA[item.id].unemployedRequired;
+        // Handle item demolition - restore unemployed villagers (only if there's population left)
+        let itemData = null;
+        if (item.type === 'building' && BUILDING_DATA[item.id]) {
+            itemData = BUILDING_DATA[item.id];
+        } else if (item.type === 'decoration' && DECORATION_DATA[item.id]) {
+            itemData = DECORATION_DATA[item.id];
+        } else if (item.type === 'road' && ROAD_DATA[item.id]) {
+            itemData = ROAD_DATA[item.id];
+        }
+        
+        if (itemData && itemData.requires && itemData.requires.unemployedPopulation) {
+            const required = itemData.requires.unemployedPopulation;
             // Only restore unemployed if there's still population
             // The workers were part of the population, so we can restore them to unemployed
             // But we need to ensure unemployed doesn't exceed total population
@@ -651,11 +754,20 @@ export class GameState {
                     this.unemployedPopulation = state.unemployedPopulation;
                 } else {
                     // Recalculate unemployed population from placed items if not in saved state
-                    // Start with total population, then subtract workers from buildings that require unemployed
+                    // Start with total population, then subtract workers from items that require unemployed
                     this.unemployedPopulation = this.population;
                     this.placedItems.forEach(item => {
-                        if (item.type === 'building' && BUILDING_DATA[item.id] && BUILDING_DATA[item.id].unemployedRequired) {
-                            const required = BUILDING_DATA[item.id].unemployedRequired;
+                        let itemData = null;
+                        if (item.type === 'building' && BUILDING_DATA[item.id]) {
+                            itemData = BUILDING_DATA[item.id];
+                        } else if (item.type === 'decoration' && DECORATION_DATA[item.id]) {
+                            itemData = DECORATION_DATA[item.id];
+                        } else if (item.type === 'road' && ROAD_DATA[item.id]) {
+                            itemData = ROAD_DATA[item.id];
+                        }
+                        
+                        if (itemData && itemData.requires && itemData.requires.unemployedPopulation) {
+                            const required = itemData.requires.unemployedPopulation;
                             this.unemployedPopulation = Math.max(0, this.unemployedPopulation - required);
                         }
                     });

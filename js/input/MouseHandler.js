@@ -369,19 +369,32 @@ export class MouseHandler {
                     return;
                 }
                 
-                // Check if building requires unemployed population
-                if (selectedTool.type === 'building' && BUILDING_DATA[selectedTool.id] && BUILDING_DATA[selectedTool.id].unemployedRequired) {
-                    const required = BUILDING_DATA[selectedTool.id].unemployedRequired;
-                    const unemployed = this.gameState.getUnemployedPopulation();
-                    if (unemployed < required) {
-                        const buildingName = BUILDING_DATA[selectedTool.id].name || selectedTool.id;
-                        const originalText = this.cursorInfo.textContent;
-                        this.cursorInfo.textContent = `No unemployed villagers! Need ${required} unemployed to build ${buildingName}.`;
-                        setTimeout(() => {
-                            this.cursorInfo.textContent = originalText;
-                        }, 2000);
-                        return;
+                // Check if item has requirements that must be met
+                const requirementsCheck = this.gameState.checkRequirements(selectedTool.type, selectedTool.id);
+                if (!requirementsCheck.met) {
+                    const originalText = this.cursorInfo.textContent;
+                    let errorMessage = 'Requirements not met! ';
+                    const missing = requirementsCheck.missing;
+                    
+                    // Build error message for all missing requirements
+                    const missingMessages = [];
+                    for (const [reqType, reqData] of Object.entries(missing)) {
+                        if (reqData && reqData.label) {
+                            missingMessages.push(`${reqData.label}: need ${reqData.required}, have ${reqData.current}`);
+                        }
                     }
+                    
+                    if (missingMessages.length > 0) {
+                        errorMessage += missingMessages.join('; ');
+                    } else {
+                        errorMessage += 'One or more requirements not met.';
+                    }
+                    
+                    this.cursorInfo.textContent = errorMessage;
+                    setTimeout(() => {
+                        this.cursorInfo.textContent = originalText;
+                    }, 2000);
+                    return;
                 }
                 
                 // Place item normally with rotation state

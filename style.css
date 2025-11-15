@@ -674,8 +674,14 @@ body {
     text-align: center;
     margin-bottom: 12px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #8b6f47;
     text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8);
+}
+
+.info-panel-divider-light {
+    height: 1px;
+    background: rgba(139, 111, 71, 0.2);
+    margin: 6px 0;
+    border-radius: 1px;
 }
 
 .info-panel-row {
@@ -683,12 +689,15 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 6px 0;
-    border-bottom: 1px solid rgba(139, 111, 71, 0.2);
     font-size: 14px;
 }
 
-.info-panel-row:last-child {
-    border-bottom: none;
+.info-panel-requirement-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 14px;
 }
 
 .info-label {
@@ -717,6 +726,11 @@ body {
 }
 
 .info-value.expense {
+    color: #8b3d2f;
+    font-weight: 600;
+}
+
+.info-value.requirement-not-met {
     color: #8b3d2f;
     font-weight: 600;
 }
