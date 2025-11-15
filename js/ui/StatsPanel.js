@@ -6,6 +6,8 @@ export class StatsPanel {
         this.gameState = gameState;
         this.renderer = renderer;
         this.budgetElement = document.getElementById('budget-display');
+        this.incomeElement = document.getElementById('income-display');
+        this.expensesElement = document.getElementById('expenses-display');
         this.populationElement = document.getElementById('population-display');
         this.unemployedElement = document.getElementById('unemployed-display');
         
@@ -41,6 +43,16 @@ export class StatsPanel {
             } else {
                 this.budgetElement.classList.remove('low-budget');
             }
+        }
+
+        if (this.incomeElement) {
+            const income = this.gameState.getTotalIncomePerInterval();
+            this.incomeElement.textContent = `Income: ⍱${income.toLocaleString()}`;
+        }
+
+        if (this.expensesElement) {
+            const expenses = this.gameState.getTotalExpensesPerInterval();
+            this.expensesElement.textContent = `Expenses: ⍱${expenses.toLocaleString()}`;
         }
 
         if (this.populationElement) {

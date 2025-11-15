@@ -14,7 +14,7 @@
 //   - sprite: Optional path to sprite file (PNG or WebP)
 //   - offsetY: Vertical offset for sprite positioning (default: 0)
 //   - incomeAmount: Optional income generated per interval (for income-generating buildings)
-//   - incomeInterval: Optional interval in milliseconds for income generation (default: 5000)
+//   - expenseAmount: Optional maintenance cost per interval (for buildings that require maintenance)
 //   - allowAdjacentPlacement: If true, allows placing items of the same type/id next to each other (default: false)
 //   - unemployedRequired: Optional number of unemployed villagers required to build this building (default: 0)
 export const BUILDING_DATA = {
@@ -28,7 +28,8 @@ export const BUILDING_DATA = {
         demolitionCostMultiplier: 0.5,
         sprite: 'sprites/house1.png',
         offsetY: 0,
-        population: 2
+        population: 2,
+        expenseAmount: 1
     },
     house2: { 
         name: 'House 2',
@@ -40,7 +41,8 @@ export const BUILDING_DATA = {
         demolitionCostMultiplier: 0.5,
         sprite: 'sprites/house2.png',
         offsetY: 0,
-        population: 4
+        population: 4,
+        expenseAmount: 1
     },
     timberman: {
         name: 'Timberman',
@@ -51,7 +53,7 @@ export const BUILDING_DATA = {
         cost: 1000,
         demolitionCostMultiplier: 0.5,
         incomeAmount: 10,
-        incomeInterval: 5000,
+        expenseAmount: 2,
         unemployedRequired: 2,
         sprite: 'sprites/timberman.png',
         offsetY: 0,
@@ -67,7 +69,7 @@ export const BUILDING_DATA = {
         sprite: 'sprites/blacksmith.png',
         offsetY: 0,
         incomeAmount: 20,
-        incomeInterval: 5000,
+        expenseAmount: 3,
         unemployedRequired: 4
     },
     wheat: {
@@ -80,7 +82,6 @@ export const BUILDING_DATA = {
         demolitionCostMultiplier: 0.5,
         sprite: 'sprites/wheat.png',
         incomeAmount: 5,
-        incomeInterval: 5000,
         unemployedRequired: 1,
         offsetY: 6,
         allowAdjacentPlacement: true
@@ -96,7 +97,6 @@ export const BUILDING_DATA = {
         sprite: 'sprites/shop.png',
         offsetY: 5,
         incomeAmount: 7,
-        incomeInterval: 5000,
         allowAdjacentPlacement: true,
         unemployedRequired: 1
     },
@@ -226,6 +226,17 @@ export const ROAD_DATA = {
         allowAdjacentPlacement: true,
         sprite: 'sprites/dirt.png'
     },
+    gravel: { 
+        name: 'Gravel',
+        color: '#8b7355', 
+        lineColor: '#6b5d3f',
+        height: 17,
+        cost: 20,
+        demolitionCostMultiplier: 0.5,
+        offsetY: 10,
+        allowAdjacentPlacement: true,
+        sprite: 'sprites/gravel.png'
+    },
     stone: { 
         name: 'Stone',
         color: '#a0a0a0', 
@@ -236,6 +247,17 @@ export const ROAD_DATA = {
         offsetY: 10,
         allowAdjacentPlacement: true,
         sprite: 'sprites/stone.png'
+    },
+    planks: { 
+        name: 'Planks',
+        color: '#a0a0a0', 
+        lineColor: '#808080',
+        height: 17,
+        cost: 35,
+        demolitionCostMultiplier: 0.5,
+        offsetY: 10,
+        allowAdjacentPlacement: true,
+        sprite: 'sprites/planks.png'
     }
 };
 

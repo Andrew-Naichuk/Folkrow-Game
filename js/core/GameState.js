@@ -359,16 +359,65 @@ export class GameState {
     /**
      * Get income generation data for a building
      * @param {string} id - Building ID
-     * @returns {{amount: number, interval: number}|null} Income data or null if building doesn't generate income
+     * @returns {{amount: number}|null} Income data or null if building doesn't generate income
      */
     getBuildingIncomeData(id) {
         if (BUILDING_DATA[id] && BUILDING_DATA[id].incomeAmount) {
             return {
-                amount: BUILDING_DATA[id].incomeAmount,
-                interval: BUILDING_DATA[id].incomeInterval || 5000
+                amount: BUILDING_DATA[id].incomeAmount
             };
         }
         return null;
+    }
+
+    /**
+     * Calculate total income generated per interval from all placed buildings
+     * @returns {number} Total income per interval
+     */
+    getTotalIncomePerInterval() {
+        let totalIncome = 0;
+        
+        this.placedItems.forEach(item => {
+            if (item.type === 'building') {
+                const incomeData = this.getBuildingIncomeData(item.id);
+                if (incomeData) {
+                    totalIncome += incomeData.amount;
+                }
+            }
+        });
+        
+        return totalIncome;
+    }
+
+    /**
+     * Get expense data for a building
+     * @param {string} id - Building ID
+     * @returns {number|null} Expense amount or null if building doesn't have expenses
+     */
+    getBuildingExpenseData(id) {
+        if (BUILDING_DATA[id] && BUILDING_DATA[id].expenseAmount) {
+            return BUILDING_DATA[id].expenseAmount;
+        }
+        return null;
+    }
+
+    /**
+     * Calculate total expenses per interval from all placed buildings
+     * @returns {number} Total expenses per interval
+     */
+    getTotalExpensesPerInterval() {
+        let totalExpenses = 0;
+        
+        this.placedItems.forEach(item => {
+            if (item.type === 'building') {
+                const expenseAmount = this.getBuildingExpenseData(item.id);
+                if (expenseAmount !== null) {
+                    totalExpenses += expenseAmount;
+                }
+            }
+        });
+        
+        return totalExpenses;
     }
 
     /**

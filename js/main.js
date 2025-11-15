@@ -10,6 +10,7 @@ import { ClearButton } from './ui/ClearButton.js';
 import { StatsPanel } from './ui/StatsPanel.js';
 import { SpriteManager } from './utils/SpriteManager.js';
 import { BUILDING_DATA, DECORATION_DATA, ROAD_DATA } from './data/itemData.js';
+import { CONFIG } from './config.js';
 
 /**
  * Main application entry point
@@ -99,8 +100,9 @@ class Game {
     }
 
     /**
-     * Start the income generation system
-     * Buildings with incomeAmount property generate income at their specified intervals
+     * Start the income generation and expense system
+     * Buildings with incomeAmount property generate income at the universal interval defined in CONFIG
+     * Buildings with expenseAmount property incur expenses at the same interval
      */
     startIncomeGeneration() {
         // Create income generators for each building type that generates income
@@ -114,13 +116,8 @@ class Game {
             }
         });
         
-        // If no income-generating buildings, return early
-        if (incomeGenerators.size === 0) {
-            return;
-        }
-        
-        // Use the shortest interval as the main loop interval
-        const minInterval = Math.min(...Array.from(incomeGenerators.values()).map(d => d.interval));
+        // Use the universal interval from config
+        const incomeInterval = CONFIG.INCOME_GENERATION_INTERVAL;
         
         // Track last generation time for each building type
         const lastGeneration = new Map();
@@ -132,29 +129,38 @@ class Game {
             const now = Date.now();
             const placedItems = this.gameState.getPlacedItems();
             
-            // Process each income-generating building type
-            incomeGenerators.forEach((incomeData, buildingId) => {
-                // Check if enough time has passed since last generation
-                const lastGen = lastGeneration.get(buildingId);
-                if (now - lastGen >= incomeData.interval) {
-                    // Count buildings of this type
-                    const buildingCount = placedItems.filter(item => 
-                        item.type === 'building' && item.id === buildingId
-                    ).length;
-                    
-                    if (buildingCount > 0) {
-                        const totalIncome = buildingCount * incomeData.amount;
-                        this.gameState.addBudget(totalIncome);
+            // Process income generation
+            if (incomeGenerators.size > 0) {
+                incomeGenerators.forEach((incomeData, buildingId) => {
+                    // Check if enough time has passed since last generation
+                    const lastGen = lastGeneration.get(buildingId);
+                    if (now - lastGen >= incomeInterval) {
+                        // Count buildings of this type
+                        const buildingCount = placedItems.filter(item => 
+                            item.type === 'building' && item.id === buildingId
+                        ).length;
                         
-                        // Trigger budget display animation
-                        this.statsPanel.animateUpdate(totalIncome);
-                        
-                        // Update last generation time
-                        lastGeneration.set(buildingId, now);
+                        if (buildingCount > 0) {
+                            const totalIncome = buildingCount * incomeData.amount;
+                            this.gameState.addBudget(totalIncome);
+                            
+                            // Trigger budget display animation
+                            this.statsPanel.animateUpdate(totalIncome);
+                            
+                            // Update last generation time
+                            lastGeneration.set(buildingId, now);
+                        }
                     }
-                }
-            });
-        }, minInterval);
+                });
+            }
+            
+            // Process expenses (maintenance costs)
+            const totalExpenses = this.gameState.getTotalExpensesPerInterval();
+            if (totalExpenses > 0) {
+                // Deduct expenses from budget (can go negative)
+                this.gameState.addBudget(-totalExpenses);
+            }
+        }, incomeInterval);
     }
 
     gameLoop() {

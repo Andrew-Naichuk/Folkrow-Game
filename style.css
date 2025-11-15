@@ -160,6 +160,20 @@ body {
     box-shadow: inset 0 2px 4px rgba(179, 122, 107, 0.2);
 }
 
+.income-display {
+    background: linear-gradient(135deg, rgba(255, 240, 200, 0.4) 0%, rgba(255, 220, 170, 0.4) 100%);
+    color: #6b5a3d;
+    border: 2px solid #b3a07a;
+    box-shadow: inset 0 2px 4px rgba(179, 160, 122, 0.2);
+}
+
+.expenses-display {
+    background: linear-gradient(135deg, rgba(255, 200, 200, 0.4) 0%, rgba(255, 170, 170, 0.4) 100%);
+    color: #6b4a3d;
+    border: 2px solid #b37a6b;
+    box-shadow: inset 0 2px 4px rgba(179, 122, 107, 0.2);
+}
+
 .budget-display.low-budget {
     color: #8b3d2f;
     border-color: #b36b5a;
