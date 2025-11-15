@@ -321,11 +321,11 @@ export class MouseHandler {
                 );
                 
                 if (item) {
-                    // Check if trying to destroy a tree or pine - requires Woodcutter or Timberman
-                    if (item.type === 'decoration' && (item.id === 'tree' || item.id === 'pine')) {
+                    // Check if trying to destroy a tree, pine, stump, or roots - requires Woodcutter or Timberman
+                    if (item.type === 'decoration' && (item.id === 'tree' || item.id === 'pine' || item.id === 'stump' || item.id === 'roots')) {
                         if (!this.gameState.hasWoodcutterOrTimberman()) {
                             const originalText = this.cursorInfo.textContent;
-                            this.cursorInfo.textContent = 'You need at least one Woodcutter or Timberman to remove trees!';
+                            this.cursorInfo.textContent = 'You need at least one Woodcutter or Timberman to remove trees, stumps, or roots!';
                             setTimeout(() => {
                                 this.cursorInfo.textContent = originalText;
                             }, 2000);

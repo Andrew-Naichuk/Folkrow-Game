@@ -20,9 +20,9 @@ export class GameState {
         // Load saved state from localStorage
         const hasSavedState = this.loadFromLocalStorage();
         
-        // If no saved state exists, initialize the game with initial trees
+        // If no saved state exists, initialize the game with initial map items
         if (!hasSavedState) {
-            this.initializeInitialTrees();
+            this.initializeInitialMap();
         }
     }
 
@@ -245,8 +245,8 @@ export class GameState {
         
         const item = this.placedItems[itemIndex];
         
-        // Check if trying to destroy a tree or pine - requires Woodcutter or Timberman
-        if (item.type === 'decoration' && (item.id === 'tree' || item.id === 'pine')) {
+        // Check if trying to destroy a tree, pine, stump, or roots - requires Woodcutter or Timberman
+        if (item.type === 'decoration' && (item.id === 'tree' || item.id === 'pine' || item.id === 'stump' || item.id === 'roots')) {
             if (!this.hasWoodcutterOrTimberman()) {
                 return false;
             }
@@ -643,9 +643,10 @@ export class GameState {
     }
 
     /**
-     * Initialize the game with initial trees randomly placed on the map
+     * Initialize the game with initial map items randomly placed on the map
      */
-    initializeInitialTrees() {
+    initializeInitialMap() {
+        // Place trees
         const treeTypes = ['tree', 'pine'];
         const targetTreeCount = CONFIG.INITIAL_TREES;
         let treesPlaced = 0;
@@ -668,7 +669,79 @@ export class GameState {
             attempts++;
         }
         
-        // Save the initial state with trees
+        // Place rocks
+        const targetRocksCount = CONFIG.INITIAL_ROCKS;
+        let rocksPlaced = 0;
+        attempts = 0;
+        const maxRocksAttempts = targetRocksCount * 10;
+        
+        while (rocksPlaced < targetRocksCount && attempts < maxRocksAttempts) {
+            const emptyCell = this.findRandomEmptyCell();
+            
+            if (emptyCell) {
+                if (this.placeItemFree(emptyCell.isoX, emptyCell.isoY, 'decoration', 'rocks')) {
+                    rocksPlaced++;
+                }
+            }
+            
+            attempts++;
+        }
+        
+        // Place boulders
+        const targetBouldersCount = CONFIG.INITIAL_BOULDERS;
+        let bouldersPlaced = 0;
+        attempts = 0;
+        const maxBouldersAttempts = targetBouldersCount * 10;
+        
+        while (bouldersPlaced < targetBouldersCount && attempts < maxBouldersAttempts) {
+            const emptyCell = this.findRandomEmptyCell();
+            
+            if (emptyCell) {
+                if (this.placeItemFree(emptyCell.isoX, emptyCell.isoY, 'decoration', 'boulder')) {
+                    bouldersPlaced++;
+                }
+            }
+            
+            attempts++;
+        }
+        
+        // Place roots
+        const targetRootsCount = CONFIG.INITIAL_ROOTS;
+        let rootsPlaced = 0;
+        attempts = 0;
+        const maxRootsAttempts = targetRootsCount * 10;
+        
+        while (rootsPlaced < targetRootsCount && attempts < maxRootsAttempts) {
+            const emptyCell = this.findRandomEmptyCell();
+            
+            if (emptyCell) {
+                if (this.placeItemFree(emptyCell.isoX, emptyCell.isoY, 'decoration', 'roots')) {
+                    rootsPlaced++;
+                }
+            }
+            
+            attempts++;
+        }
+        
+        // Place stumps
+        const targetStumpsCount = CONFIG.INITIAL_STUMPS;
+        let stumpsPlaced = 0;
+        attempts = 0;
+        const maxStumpsAttempts = targetStumpsCount * 10;
+        
+        while (stumpsPlaced < targetStumpsCount && attempts < maxStumpsAttempts) {
+            const emptyCell = this.findRandomEmptyCell();
+            
+            if (emptyCell) {
+                if (this.placeItemFree(emptyCell.isoX, emptyCell.isoY, 'decoration', 'stump')) {
+                    stumpsPlaced++;
+                }
+            }
+            
+            attempts++;
+        }
+        
+        // Save the initial state with all map items
         this.saveToLocalStorage();
     }
 }
