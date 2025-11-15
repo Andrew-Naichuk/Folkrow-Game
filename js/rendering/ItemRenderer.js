@@ -264,17 +264,22 @@ export class ItemRenderer {
     drawRoad(isoX, isoY, id, flipped = false) {
         const data = ROAD_DATA[id] || ROAD_DATA.basic;
         
-        // Set opacity to 30% for all roads
-        this.ctx.save();
-        this.ctx.globalAlpha = 0.35;
+        // Calculate height scale based on road height
+        // Use house1 (height 20) as the reference base height
+        const baseHeight = 20;
+        const heightScale = data.height ? data.height / baseHeight : 1.0;
         
         // Try to draw sprite first, fallback to procedural rendering
-        // Get offsetY from item data (default: -1 for roads)
-        const offsetY = data.offsetY !== undefined ? data.offsetY : -1;
-        if (data.sprite && this.drawSprite(isoX, isoY, data.sprite, offsetY, 1.0, flipped)) {
-            this.ctx.restore();
+        // Get offsetY from item data (default: 0)
+        const offsetY = data.offsetY !== undefined ? data.offsetY : 0;
+        // Pass heightScale to scale sprite based on road height
+        if (data.sprite && this.drawSprite(isoX, isoY, data.sprite, offsetY, heightScale, flipped)) {
             return;
         }
+        
+        // Fallback to procedural rendering with reduced opacity
+        this.ctx.save();
+        this.ctx.globalAlpha = 1;
         
         const zoom = this.camera.getZoom();
         const screen = isoToScreen(

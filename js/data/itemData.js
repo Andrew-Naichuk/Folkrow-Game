@@ -68,7 +68,6 @@ export const BUILDING_DATA = {
         offsetY: 0,
         incomeAmount: 20,
         incomeInterval: 5000,
-        allowAdjacentPlacement: true,
         unemployedRequired: 4
     },
     wheat: {
@@ -153,7 +152,8 @@ export const DECORATION_DATA = {
         offsetY: -8,
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
-        sprite: 'sprites/tree.png'
+        sprite: 'sprites/tree.png',
+        resource: "wood"
     },
     pine: { 
         name: 'Pine Tree',
@@ -163,7 +163,8 @@ export const DECORATION_DATA = {
         offsetY: -8,
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
-        sprite: 'sprites/pine.png'
+        sprite: 'sprites/pine.png',
+        resource: "wood"
     },
     bush: { 
         name: 'Bush',
@@ -217,24 +218,24 @@ export const ROAD_DATA = {
     dirt: { 
         name: 'Dirt',
         color: '#8b7355', 
-        lineColor: '#6b5d3f', 
-        pattern: 'dirt',
+        lineColor: '#6b5d3f',
+        height: 17,
         cost: 10,
         demolitionCostMultiplier: 0.5,
-        offsetY: 0,
-        allowAdjacentPlacement: true
-        // sprite: 'sprites/road_dirt.png' // Optional: path to sprite file
+        offsetY: 10,
+        allowAdjacentPlacement: true,
+        sprite: 'sprites/dirt.png'
     },
     stone: { 
         name: 'Stone',
         color: '#a0a0a0', 
-        lineColor: '#808080', 
-        pattern: 'stone',
+        lineColor: '#808080',
+        height: 17,
         cost: 50,
         demolitionCostMultiplier: 0.5,
-        offsetY: 0,
-        allowAdjacentPlacement: true
-        // sprite: 'sprites/road_stone.png' // Optional: path to sprite file
+        offsetY: 10,
+        allowAdjacentPlacement: true,
+        sprite: 'sprites/stone.png'
     }
 };
 

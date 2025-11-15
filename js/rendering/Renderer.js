@@ -91,6 +91,48 @@ export class Renderer {
         const placedItems = this.gameState.getPlacedItems();
         const villagers = this.villagerManager ? this.villagerManager.getVillagers() : [];
         
+        // Helper function to get the maximum depth of surrounding road tiles for a villager
+        // This ensures villagers render after all surrounding road tiles
+        const getVillagerDepth = (villager) => {
+            const villagerX = Math.round(villager.isoX);
+            const villagerY = Math.round(villager.isoY);
+            const villagerDepth = villagerX + villagerY;
+            let maxSurroundingRoadDepth = villagerDepth;
+            
+            // Check all 9 tiles: current tile + 8 surrounding tiles (4 cardinal + 4 diagonal)
+            const directions = [
+                { dx: 0, dy: 0 },   // Current tile
+                { dx: -1, dy: 0 },  // West
+                { dx: 1, dy: 0 },   // East
+                { dx: 0, dy: -1 },  // North
+                { dx: 0, dy: 1 },   // South
+                { dx: -1, dy: -1 }, // Northwest
+                { dx: 1, dy: -1 },  // Northeast
+                { dx: -1, dy: 1 },  // Southwest
+                { dx: 1, dy: 1 }    // Southeast
+            ];
+            
+            // Check each tile (including current) for roads
+            directions.forEach(dir => {
+                const checkX = villagerX + dir.dx;
+                const checkY = villagerY + dir.dy;
+                
+                // Check if there's a road at this position
+                const hasRoad = placedItems.some(item => 
+                    item.type === 'road' && 
+                    item.isoX === checkX && 
+                    item.isoY === checkY
+                );
+                
+                if (hasRoad) {
+                    const roadDepth = checkX + checkY;
+                    maxSurroundingRoadDepth = Math.max(maxSurroundingRoadDepth, roadDepth);
+                }
+            });
+            
+            return maxSurroundingRoadDepth;
+        };
+        
         // Combine items and villagers for depth sorting
         // Add render priority: roads (0), decorations (1), buildings (2), villagers (3)
         const allEntities = [
@@ -107,8 +149,15 @@ export class Renderer {
         ];
         
         const sortedEntities = allEntities.sort((a, b) => {
-            const depthA = a.data.isoX + a.data.isoY;
-            const depthB = b.data.isoX + b.data.isoY;
+            // For villagers, use the maximum depth of surrounding road tiles
+            // For other entities, use their own depth
+            const depthA = a.type === 'villager' 
+                ? getVillagerDepth(a.data) 
+                : (a.data.isoX + a.data.isoY);
+            const depthB = b.type === 'villager' 
+                ? getVillagerDepth(b.data) 
+                : (b.data.isoX + b.data.isoY);
+            
             // Sort by depth (ascending - lower depth = draw first)
             if (depthA !== depthB) {
                 return depthA - depthB;
