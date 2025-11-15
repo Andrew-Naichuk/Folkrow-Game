@@ -119,22 +119,19 @@ class Game {
         // Use the universal interval from config
         const incomeInterval = CONFIG.INCOME_GENERATION_INTERVAL;
         
-        // Track last generation time for each building type
-        const lastGeneration = new Map();
-        incomeGenerators.forEach((data, buildingId) => {
-            lastGeneration.set(buildingId, 0);
-        });
+        // Track last processing time for both income and expenses
+        let lastProcessed = 0;
         
         setInterval(() => {
             const now = Date.now();
-            const placedItems = this.gameState.getPlacedItems();
             
-            // Process income generation
-            if (incomeGenerators.size > 0) {
-                incomeGenerators.forEach((incomeData, buildingId) => {
-                    // Check if enough time has passed since last generation
-                    const lastGen = lastGeneration.get(buildingId);
-                    if (now - lastGen >= incomeInterval) {
+            // Only process if enough time has passed (ensures both income and expenses are processed together)
+            if (now - lastProcessed >= incomeInterval) {
+                const placedItems = this.gameState.getPlacedItems();
+                
+                // Process income generation
+                if (incomeGenerators.size > 0) {
+                    incomeGenerators.forEach((incomeData, buildingId) => {
                         // Count buildings of this type
                         const buildingCount = placedItems.filter(item => 
                             item.type === 'building' && item.id === buildingId
@@ -146,19 +143,19 @@ class Game {
                             
                             // Trigger budget display animation
                             this.statsPanel.animateUpdate(totalIncome);
-                            
-                            // Update last generation time
-                            lastGeneration.set(buildingId, now);
                         }
-                    }
-                });
-            }
-            
-            // Process expenses (maintenance costs)
-            const totalExpenses = this.gameState.getTotalExpensesPerInterval();
-            if (totalExpenses > 0) {
-                // Deduct expenses from budget (can go negative)
-                this.gameState.addBudget(-totalExpenses);
+                    });
+                }
+                
+                // Process expenses (maintenance costs) - always processed together with income
+                const totalExpenses = this.gameState.getTotalExpensesPerInterval();
+                if (totalExpenses > 0) {
+                    // Deduct expenses from budget (can go negative)
+                    this.gameState.addBudget(-totalExpenses);
+                }
+                
+                // Update last processed time
+                lastProcessed = now;
             }
         }, incomeInterval);
     }

@@ -1,27 +1,23 @@
 // Building data definitions
 // To use a sprite, add a 'sprite' property with the path to your PNG or WebP file
 // Example: sprite: 'sprites/house1.png'
-// If a sprite is provided, it will be used instead of procedural rendering
 //
 // Properties:
 //   - name: Display name shown in the UI
-//   - color: Base color for procedural rendering (fallback if no sprite)
-//   - roofColor: Roof color for procedural rendering (buildings only)
 //   - height: Building height in pixels (affects sprite scaling)
 //   - width: Building width in tiles (currently always 1)
 //   - cost: Purchase cost
 //   - demolitionCostMultiplier: Multiplier for demolition cost (default: 0.5 = half price)
 //   - sprite: Optional path to sprite file (PNG or WebP)
 //   - offsetY: Vertical offset for sprite positioning (default: 0)
+//   - population: Number of villagers this building houses (for houses)
 //   - incomeAmount: Optional income generated per interval (for income-generating buildings)
 //   - expenseAmount: Optional maintenance cost per interval (for buildings that require maintenance)
 //   - allowAdjacentPlacement: If true, allows placing items of the same type/id next to each other (default: false)
 //   - unemployedRequired: Optional number of unemployed villagers required to build this building (default: 0)
 export const BUILDING_DATA = {
     house1: { 
-        name: 'House',
-        color: '#8b4513', 
-        roofColor: '#8b0000', 
+        name: 'Basic house',
         height: 18, 
         width: 1,
         cost: 300,
@@ -29,99 +25,89 @@ export const BUILDING_DATA = {
         sprite: 'sprites/house1.png',
         offsetY: 0,
         population: 2,
-        expenseAmount: 1
+        expenseAmount: 2
     },
     house2: { 
-        name: 'House 2',
-        color: '#4682b4', 
-        roofColor: '#2f4f4f', 
+        name: 'Stone house',
         height: 20, 
         width: 1,
-        cost: 500,
+        cost: 600,
         demolitionCostMultiplier: 0.5,
         sprite: 'sprites/house2.png',
         offsetY: 0,
         population: 4,
-        expenseAmount: 1
+        expenseAmount: 3
     },
     timberman: {
         name: 'Timberman',
-        color: '#8b4513',
-        roofColor: '#b8860b',
         height: 20,
         width: 1,
         cost: 1000,
         demolitionCostMultiplier: 0.5,
-        incomeAmount: 10,
-        expenseAmount: 2,
-        unemployedRequired: 2,
+        incomeAmount: 14,
+        expenseAmount: 5,
+        unemployedRequired: 3,
         sprite: 'sprites/timberman.png',
         offsetY: 0,
     },
     blacksmith: { 
         name: 'Blacksmith',
-        color: '#2f2f2f', 
-        roofColor: '#1a1a1a', 
         height: 20, 
         width: 1,
-        cost: 1850,
+        cost: 1800,
         demolitionCostMultiplier: 0.5,
         sprite: 'sprites/blacksmith.png',
         offsetY: 0,
-        incomeAmount: 20,
-        expenseAmount: 3,
+        incomeAmount: 26,
+        expenseAmount: 9,
         unemployedRequired: 4
     },
     wheat: {
         name: 'Wheat',
-        color: '#f0e68c',
-        roofColor: '#ddaa00',
         height: 15,
         width: 1,
-        cost: 100,
+        cost: 120,
         demolitionCostMultiplier: 0.5,
         sprite: 'sprites/wheat.png',
-        incomeAmount: 5,
+        incomeAmount: 3,
+        expenseAmount: 1,
         unemployedRequired: 1,
-        offsetY: 6,
+        offsetY: 4,
         allowAdjacentPlacement: true
     },
     shop: { 
         name: 'Shop',
-        color: '#daa520', 
-        roofColor: '#b8860b', 
         height: 20, 
         width: 1,
-        cost: 650,
+        cost: 700,
         demolitionCostMultiplier: 0.5,
         sprite: 'sprites/shop.png',
         offsetY: 5,
-        incomeAmount: 7,
+        incomeAmount: 9,
+        expenseAmount: 3,
         allowAdjacentPlacement: true,
-        unemployedRequired: 1
+        unemployedRequired: 2
     },
     campfire: { 
         name: 'Campfire',
-        color: '#8b4513', 
-        roofColor: '#ff4500', 
         height: 20, 
         width: 1,
-        cost: 50,
+        cost: 75,
         demolitionCostMultiplier: 0.5,
         sprite: 'sprites/campfire.png',
         offsetY: 10,
+        expenseAmount: 1,
         allowAdjacentPlacement: true
     },
     well: { 
         name: 'Well',
-        color: '#696969', 
-        roofColor: '#ffd700', 
         height: 20, 
         width: 1,
-        cost: 100,
+        cost: 150,
         demolitionCostMultiplier: 0.5,
         sprite: 'sprites/well.png',
         offsetY: 4,
+        expenseAmount: 1,
         allowAdjacentPlacement: true
     }
 };
@@ -131,23 +117,15 @@ export const BUILDING_DATA = {
 //
 // Properties:
 //   - name: Display name shown in the UI
-//   - color: Base color for procedural rendering (fallback if no sprite)
-//   - topColor: Top/secondary color (for tree, bush)
-//   - trunkColor: Trunk color (for tree)
-//   - lightColor: Light color (for lamp)
-//   - size: Size in pixels for procedural rendering
 //   - cost: Purchase cost
 //   - demolitionCostMultiplier: Multiplier for demolition cost (default: 0.5 = half price)
 //   - sprite: Optional path to sprite file (PNG or WebP)
 //   - offsetY: Vertical offset for sprite positioning (default: 0)
 //   - allowAdjacentPlacement: If true, allows placing items of the same type/id next to each other (default: false)
+//   - resource: Optional resource type that this decoration provides when harvested (e.g., "wood")
 export const DECORATION_DATA = {
     tree: { 
         name: 'Tree',
-        color: '#228b22', 
-        topColor: '#32cd32', 
-        trunkColor: '#8b4513', 
-        size: 12,
         cost: 20,
         offsetY: -8,
         demolitionCostMultiplier: 0.5,
@@ -157,8 +135,6 @@ export const DECORATION_DATA = {
     },
     pine: { 
         name: 'Pine Tree',
-        color: '#708090', 
-        size: 8,
         cost: 45,
         offsetY: -8,
         demolitionCostMultiplier: 0.5,
@@ -168,9 +144,6 @@ export const DECORATION_DATA = {
     },
     bush: { 
         name: 'Bush',
-        color: '#2d5016', 
-        topColor: '#3d6b1f', 
-        size: 10,
         cost: 15,
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
@@ -179,9 +152,6 @@ export const DECORATION_DATA = {
     },
     lamp: { 
         name: 'Lamp',
-        color: '#2f2f2f', 
-        lightColor: '#ffd700', 
-        size: 6,
         cost: 75,
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
@@ -190,9 +160,6 @@ export const DECORATION_DATA = {
     },
     bench: {
         name: 'Bench',
-        color: '#8b4513',
-        topColor: '#b8860b',
-        size: 10,
         cost: 120,
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
@@ -206,19 +173,15 @@ export const DECORATION_DATA = {
 //
 // Properties:
 //   - name: Display name shown in the UI
-//   - color: Base color for procedural rendering (fallback if no sprite)
-//   - lineColor: Line/marking color for procedural rendering
-//   - pattern: Pattern type (solid, dirt, stone, highway) for procedural rendering
+//   - height: Road height in pixels (affects sprite scaling)
 //   - cost: Purchase cost
 //   - demolitionCostMultiplier: Multiplier for demolition cost (default: 0.5 = half price)
 //   - sprite: Optional path to sprite file (PNG or WebP)
-//   - offsetY: Vertical offset for sprite positioning (default: -1 for roads)
+//   - offsetY: Vertical offset for sprite positioning (default: 10 for roads)
 //   - allowAdjacentPlacement: If true, allows placing items of the same type/id next to each other (default: false)
 export const ROAD_DATA = {
     dirt: { 
         name: 'Dirt',
-        color: '#8b7355', 
-        lineColor: '#6b5d3f',
         height: 17,
         cost: 10,
         demolitionCostMultiplier: 0.5,
@@ -228,8 +191,6 @@ export const ROAD_DATA = {
     },
     gravel: { 
         name: 'Gravel',
-        color: '#8b7355', 
-        lineColor: '#6b5d3f',
         height: 17,
         cost: 20,
         demolitionCostMultiplier: 0.5,
@@ -239,8 +200,6 @@ export const ROAD_DATA = {
     },
     stone: { 
         name: 'Stone',
-        color: '#a0a0a0', 
-        lineColor: '#808080',
         height: 17,
         cost: 50,
         demolitionCostMultiplier: 0.5,
@@ -250,8 +209,6 @@ export const ROAD_DATA = {
     },
     planks: { 
         name: 'Planks',
-        color: '#a0a0a0', 
-        lineColor: '#808080',
         height: 17,
         cost: 35,
         demolitionCostMultiplier: 0.5,
@@ -260,4 +217,3 @@ export const ROAD_DATA = {
         sprite: 'sprites/planks.png'
     }
 };
-

@@ -35,9 +35,9 @@ export class VillagerManager {
      * Spawn a new villager on a road tile
      */
     spawnVillager() {
-        const maxVillagers = this.gameState.getPopulation();
+        const maxVillagers = this.gameState.getUnemployedPopulation();
         
-        // Don't spawn if population is 0 or we've reached the population limit
+        // Don't spawn if unemployed population is 0 or we've reached the unemployed population limit
         if (maxVillagers === 0 || this.villagers.length >= maxVillagers) {
             return;
         }
@@ -80,16 +80,16 @@ export class VillagerManager {
      * @param {number} deltaTime - Time since last update in milliseconds
      */
     update(deltaTime) {
-        const maxVillagers = this.gameState.getPopulation();
+        const maxVillagers = this.gameState.getUnemployedPopulation();
         
-        // Spawn new villagers periodically (only if population > 0)
+        // Spawn new villagers periodically (only if unemployed population > 0)
         const now = Date.now();
         if (maxVillagers > 0 && now - this.lastSpawnTime >= this.spawnInterval && this.villagers.length < maxVillagers) {
             this.spawnVillager();
             this.lastSpawnTime = now;
         }
         
-        // Remove excess villagers if population decreased
+        // Remove excess villagers if unemployed population decreased
         if (this.villagers.length > maxVillagers) {
             const excess = this.villagers.length - maxVillagers;
             this.villagers.splice(0, excess);

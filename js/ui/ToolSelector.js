@@ -10,7 +10,10 @@ export class ToolSelector {
         this.mouseHandler = mouseHandler;
         this.spriteManager = spriteManager;
         this.sidebar = document.querySelector('.sidebar');
+        this.infoPanel = null;
+        this.currentHoveredItem = null;
         this.generateToolItems();
+        this.createInfoPanel();
         this.setupEventListeners();
     }
     
@@ -109,7 +112,46 @@ export class ToolSelector {
             this.setupSpritePreviewForItem(toolItem, itemData.sprite, type);
         }
 
+        // Add hover event listeners for info panel
+        this.setupHoverListeners(toolItem, type, id);
+
         return toolItem;
+    }
+
+    /**
+     * Setup hover event listeners for a tool item
+     * @param {HTMLElement} toolItem - Tool item element
+     * @param {string} type - Item type
+     * @param {string} id - Item ID
+     */
+    setupHoverListeners(toolItem, type, id) {
+        let hoverTimeout = null;
+
+        toolItem.addEventListener('mouseenter', () => {
+            if (type === 'tool') return; // Skip tools like bulldozer
+            
+            const itemData = this.getItemData(type, id);
+            if (itemData) {
+                // Clear any pending hide timeout
+                if (hoverTimeout) {
+                    clearTimeout(hoverTimeout);
+                    hoverTimeout = null;
+                }
+                this.currentHoveredItem = toolItem;
+                this.showInfoPanel(toolItem, itemData);
+            }
+        });
+
+        toolItem.addEventListener('mouseleave', () => {
+            if (type === 'tool') return;
+            
+            // Delay hiding to allow moving to the info panel
+            hoverTimeout = setTimeout(() => {
+                if (this.currentHoveredItem === toolItem) {
+                    this.hideInfoPanel();
+                }
+            }, 150);
+        });
     }
 
     /**
@@ -208,6 +250,113 @@ export class ToolSelector {
         }
     }
 
+    /**
+     * Create the info panel element
+     */
+    createInfoPanel() {
+        this.infoPanel = document.createElement('div');
+        this.infoPanel.className = 'item-info-panel';
+        this.infoPanel.style.display = 'none';
+        document.body.appendChild(this.infoPanel);
+    }
+
+    /**
+     * Show info panel with item details
+     * @param {HTMLElement} toolItem - The tool item being hovered
+     * @param {Object} itemData - Item data
+     */
+    showInfoPanel(toolItem, itemData) {
+        if (!this.infoPanel || !itemData) return;
+
+        // Build the content
+        let content = `<div class="info-panel-title">${itemData.name || 'Unknown Item'}</div>`;
+        
+        // Description (if available)
+        if (itemData.description) {
+            content += `<div class="info-panel-row"><span class="info-label">Description:</span><span class="info-value">${itemData.description}</span></div>`;
+        }
+        
+        // Cost
+        if (itemData.cost !== undefined) {
+            content += `<div class="info-panel-row"><span class="info-label">Cost:</span><span class="info-value">⍱${itemData.cost}</span></div>`;
+        }
+        
+        // Income
+        if (itemData.incomeAmount !== undefined && itemData.incomeAmount > 0) {
+            content += `<div class="info-panel-row"><span class="info-label">Income:</span><span class="info-value income">⍱${itemData.incomeAmount} / interval</span></div>`;
+        }
+        
+        // Expense
+        if (itemData.expenseAmount !== undefined && itemData.expenseAmount > 0) {
+            content += `<div class="info-panel-row"><span class="info-label">Expense:</span><span class="info-value expense">⍱${itemData.expenseAmount} / interval</span></div>`;
+        }
+        
+        // Workers needed
+        if (itemData.unemployedRequired !== undefined && itemData.unemployedRequired > 0) {
+            content += `<div class="info-panel-row"><span class="info-label">Workers Needed:</span><span class="info-value">${itemData.unemployedRequired}</span></div>`;
+        }
+        
+        // Population (for houses)
+        if (itemData.population !== undefined && itemData.population > 0) {
+            content += `<div class="info-panel-row"><span class="info-label">Houses:</span><span class="info-value">${itemData.population} villagers</span></div>`;
+        }
+
+        this.infoPanel.innerHTML = content;
+        this.infoPanel.style.display = 'block';
+        this.infoPanel.style.visibility = 'hidden'; // Hide temporarily to measure
+
+        // Position the panel near the hovered item
+        this.positionInfoPanel(toolItem);
+    }
+
+    /**
+     * Position the info panel relative to the hovered item
+     * @param {HTMLElement} toolItem - The tool item being hovered
+     */
+    positionInfoPanel(toolItem) {
+        if (!this.infoPanel || !toolItem) return;
+
+        // Use requestAnimationFrame to ensure the panel is rendered before calculating position
+        requestAnimationFrame(() => {
+            const rect = toolItem.getBoundingClientRect();
+            const sidebarRect = this.sidebar.getBoundingClientRect();
+            const panelRect = this.infoPanel.getBoundingClientRect();
+
+            // Position to the right of the sidebar, or to the left if not enough space
+            let left = sidebarRect.right + 15;
+            let top = rect.top;
+
+            // If panel would go off screen to the right, position it to the left of the sidebar
+            if (left + panelRect.width > window.innerWidth - 15) {
+                left = sidebarRect.left - panelRect.width - 15;
+            }
+
+            // If panel would go off screen at the bottom, adjust top
+            if (top + panelRect.height > window.innerHeight - 15) {
+                top = window.innerHeight - panelRect.height - 15;
+            }
+
+            // If panel would go off screen at the top, adjust top
+            if (top < 15) {
+                top = 15;
+            }
+
+            this.infoPanel.style.left = `${left}px`;
+            this.infoPanel.style.top = `${top}px`;
+            this.infoPanel.style.visibility = 'visible'; // Make visible after positioning
+        });
+    }
+
+    /**
+     * Hide the info panel
+     */
+    hideInfoPanel() {
+        if (this.infoPanel) {
+            this.infoPanel.style.display = 'none';
+        }
+        this.currentHoveredItem = null;
+    }
+
     setupEventListeners() {
         // Use event delegation to handle dynamically added items
         document.addEventListener('click', (e) => {
@@ -247,6 +396,26 @@ export class ToolSelector {
             
             this.renderer.render();
         });
+
+        // Keep panel visible when hovering over it
+        if (this.infoPanel) {
+            let panelHoverTimeout = null;
+            
+            this.infoPanel.addEventListener('mouseenter', () => {
+                // Clear any pending hide timeout
+                if (panelHoverTimeout) {
+                    clearTimeout(panelHoverTimeout);
+                    panelHoverTimeout = null;
+                }
+            });
+            
+            this.infoPanel.addEventListener('mouseleave', () => {
+                // Delay hiding when leaving the panel
+                panelHoverTimeout = setTimeout(() => {
+                    this.hideInfoPanel();
+                }, 100);
+            });
+        }
     }
 }
 
