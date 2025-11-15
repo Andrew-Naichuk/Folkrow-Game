@@ -321,6 +321,18 @@ export class MouseHandler {
                 );
                 
                 if (item) {
+                    // Check if trying to destroy a tree or pine - requires Woodcutter or Timberman
+                    if (item.type === 'decoration' && (item.id === 'tree' || item.id === 'pine')) {
+                        if (!this.gameState.hasWoodcutterOrTimberman()) {
+                            const originalText = this.cursorInfo.textContent;
+                            this.cursorInfo.textContent = 'You need at least one Woodcutter or Timberman to remove trees!';
+                            setTimeout(() => {
+                                this.cursorInfo.textContent = originalText;
+                            }, 2000);
+                            return;
+                        }
+                    }
+                    
                     const cost = this.gameState.getItemCost(item.type, item.id);
                     const demolitionCost = Math.floor(cost / 2);
                     const budget = this.gameState.getBudget();

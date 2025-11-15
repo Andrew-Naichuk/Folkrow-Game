@@ -18,7 +18,12 @@ export class GameState {
         this.unemployedPopulation = 0; // Initial unemployed population is 0 (equals population by default)
         
         // Load saved state from localStorage
-        this.loadFromLocalStorage();
+        const hasSavedState = this.loadFromLocalStorage();
+        
+        // If no saved state exists, initialize the game with initial trees
+        if (!hasSavedState) {
+            this.initializeInitialTrees();
+        }
     }
 
     /**
@@ -240,6 +245,13 @@ export class GameState {
         
         const item = this.placedItems[itemIndex];
         
+        // Check if trying to destroy a tree or pine - requires Woodcutter or Timberman
+        if (item.type === 'decoration' && (item.id === 'tree' || item.id === 'pine')) {
+            if (!this.hasWoodcutterOrTimberman()) {
+                return false;
+            }
+        }
+        
         // Get demolition cost from item data
         const demolitionCost = this.getDemolitionCost(item.type, item.id);
         
@@ -286,6 +298,112 @@ export class GameState {
      */
     getPlacedItems() {
         return this.placedItems;
+    }
+
+    /**
+     * Place an item at the specified position without cost (for environment events)
+     * @param {number} isoX - Isometric X coordinate
+     * @param {number} isoY - Isometric Y coordinate
+     * @param {string} type - Item type
+     * @param {string} id - Item ID
+     * @param {boolean} flipped - Whether the item should be horizontally flipped
+     * @returns {boolean} True if item was placed successfully
+     */
+    placeItemFree(isoX, isoY, type, id, flipped = false) {
+        // Check if position is valid (but skip cost and budget checks)
+        if (isoX < -CONFIG.GRID_SIZE || isoX > CONFIG.GRID_SIZE || 
+            isoY < -CONFIG.GRID_SIZE || isoY > CONFIG.GRID_SIZE) {
+            return false;
+        }
+        
+        // Check if position is already occupied
+        if (this.placedItems.some(item => 
+            item.isoX === isoX && item.isoY === isoY
+        )) {
+            return false;
+        }
+        
+        // For trees, we allow adjacent placement (they have allowAdjacentPlacement: true)
+        // But we still check if the exact position is free
+        
+        this.placedItems.push({
+            type: type,
+            id: id,
+            isoX: isoX,
+            isoY: isoY,
+            flipped: flipped || false
+        });
+        
+        // Save state to localStorage
+        this.saveToLocalStorage();
+        
+        return true;
+    }
+
+    /**
+     * Remove an item at the specified position without cost (for environment events)
+     * @param {number} isoX - Isometric X coordinate
+     * @param {number} isoY - Isometric Y coordinate
+     * @returns {boolean} True if an item was removed
+     */
+    removeItemFree(isoX, isoY) {
+        const itemIndex = this.placedItems.findIndex(item => 
+            item.isoX === isoX && item.isoY === isoY
+        );
+        
+        if (itemIndex === -1) {
+            return false;
+        }
+        
+        // Remove the item (no cost, no population changes for environment events)
+        this.placedItems.splice(itemIndex, 1);
+        
+        // Save state to localStorage
+        this.saveToLocalStorage();
+        
+        return true;
+    }
+
+    /**
+     * Find a random empty cell on the map
+     * @returns {{isoX: number, isoY: number}|null} Random empty cell or null if no empty cells found
+     */
+    findRandomEmptyCell() {
+        const maxAttempts = 1000; // Limit attempts to avoid infinite loops
+        let attempts = 0;
+        
+        while (attempts < maxAttempts) {
+            const isoX = Math.floor(Math.random() * (CONFIG.GRID_SIZE * 2 + 1)) - CONFIG.GRID_SIZE;
+            const isoY = Math.floor(Math.random() * (CONFIG.GRID_SIZE * 2 + 1)) - CONFIG.GRID_SIZE;
+            
+            // Check if position is empty
+            if (!this.placedItems.some(item => 
+                item.isoX === isoX && item.isoY === isoY
+            )) {
+                return { isoX, isoY };
+            }
+            
+            attempts++;
+        }
+        
+        return null; // No empty cell found after max attempts
+    }
+
+    /**
+     * Find a random tree on the map
+     * @returns {{isoX: number, isoY: number}|null} Random tree position or null if no trees found
+     */
+    findRandomTree() {
+        const trees = this.placedItems.filter(item => 
+            item.type === 'decoration' && (item.id === 'tree' || item.id === 'pine')
+        );
+        
+        if (trees.length === 0) {
+            return null;
+        }
+        
+        const randomTree = trees[Math.floor(Math.random() * trees.length)];
+        return { isoX: randomTree.isoX, isoY: randomTree.isoY };
     }
 
     /**
@@ -437,6 +555,16 @@ export class GameState {
     }
 
     /**
+     * Check if player has at least one Woodcutter or Timberman building
+     * @returns {boolean} True if player has at least one Woodcutter or Timberman
+     */
+    hasWoodcutterOrTimberman() {
+        return this.placedItems.some(item => 
+            item.type === 'building' && (item.id === 'woodcutter' || item.id === 'timberman')
+        );
+    }
+
+    /**
      * Save current game state to localStorage
      */
     saveToLocalStorage() {
@@ -455,6 +583,7 @@ export class GameState {
 
     /**
      * Load game state from localStorage
+     * @returns {boolean} True if a saved state was found and loaded, false otherwise
      */
     loadFromLocalStorage() {
         try {
@@ -502,11 +631,45 @@ export class GameState {
                 
                 // Safety check: ensure unemployed never exceeds total population
                 this.unemployedPopulation = Math.min(this.population, this.unemployedPopulation);
+                
+                return true; // Saved state was found and loaded
             }
         } catch (error) {
             console.warn('Failed to load game state from localStorage:', error);
             // If loading fails, use default values (already set in constructor)
         }
+        
+        return false; // No saved state found
+    }
+
+    /**
+     * Initialize the game with initial trees randomly placed on the map
+     */
+    initializeInitialTrees() {
+        const treeTypes = ['tree', 'pine'];
+        const targetTreeCount = CONFIG.INITIAL_TREES;
+        let treesPlaced = 0;
+        let attempts = 0;
+        const maxAttempts = targetTreeCount * 10; // Limit attempts to avoid infinite loops
+        
+        while (treesPlaced < targetTreeCount && attempts < maxAttempts) {
+            const emptyCell = this.findRandomEmptyCell();
+            
+            if (emptyCell) {
+                // Randomly choose between 'tree' and 'pine'
+                const randomTreeType = treeTypes[Math.floor(Math.random() * treeTypes.length)];
+                
+                // Place the tree without cost
+                if (this.placeItemFree(emptyCell.isoX, emptyCell.isoY, 'decoration', randomTreeType)) {
+                    treesPlaced++;
+                }
+            }
+            
+            attempts++;
+        }
+        
+        // Save the initial state with trees
+        this.saveToLocalStorage();
     }
 }
 

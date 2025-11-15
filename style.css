@@ -690,6 +690,13 @@ body {
     flex: 1;
 }
 
+.info-value-description {
+    font-weight: 500;
+    color: #3d2f1f;
+    text-align: left;
+    flex: 1;
+}
+
 .info-value.income {
     color: #2d5a3d;
     font-weight: 600;

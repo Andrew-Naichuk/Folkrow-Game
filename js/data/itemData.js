@@ -18,6 +18,7 @@
 export const BUILDING_DATA = {
     house1: { 
         name: 'Basic house',
+        description: 'A tiny roof, two dreams and just enough room to argue',
         height: 18, 
         width: 1,
         cost: 300,
@@ -29,6 +30,7 @@ export const BUILDING_DATA = {
     },
     house2: { 
         name: 'Stone house',
+        description: 'Solid walls, soft beds and gossip that lasts generations',
         height: 20, 
         width: 1,
         cost: 600,
@@ -40,6 +42,7 @@ export const BUILDING_DATA = {
     },
     timberman: {
         name: 'Timberman',
+        description: 'Turns trees into planks and planks into pure profit',
         height: 20,
         width: 1,
         cost: 1000,
@@ -52,6 +55,7 @@ export const BUILDING_DATA = {
     },
     blacksmith: { 
         name: 'Blacksmith',
+        description: 'Where metal screams, sparks dance and coins change pockets',
         height: 20, 
         width: 1,
         cost: 1800,
@@ -64,6 +68,7 @@ export const BUILDING_DATA = {
     },
     wheat: {
         name: 'Wheat',
+        description: 'A humble patch of grain that keeps bellies and coffers full',
         height: 15,
         width: 1,
         cost: 120,
@@ -77,6 +82,7 @@ export const BUILDING_DATA = {
     },
     shop: { 
         name: 'Shop',
+        description: 'Villagers come for goods and leave with lighter pockets',
         height: 20, 
         width: 1,
         cost: 700,
@@ -88,8 +94,21 @@ export const BUILDING_DATA = {
         allowAdjacentPlacement: true,
         unemployedRequired: 2
     },
+    woodcutter: { 
+        name: 'Woodcutter',
+        description: 'Chopping down trees and clearing paths',
+        height: 20, 
+        width: 1,
+        cost: 170,
+        demolitionCostMultiplier: 0.5,
+        sprite: 'sprites/woodcutter.png',
+        offsetY: 7,
+        expenseAmount: 0.5,
+        unemployedRequired: 1
+    },
     campfire: { 
         name: 'Campfire',
+        description: 'Stories get taller as the fire burns brighter',
         height: 20, 
         width: 1,
         cost: 75,
@@ -101,6 +120,7 @@ export const BUILDING_DATA = {
     },
     well: { 
         name: 'Well',
+        description: 'Cool water, fresh rumors and a meeting point for everyone',
         height: 20, 
         width: 1,
         cost: 150,
@@ -126,6 +146,7 @@ export const BUILDING_DATA = {
 export const DECORATION_DATA = {
     tree: { 
         name: 'Tree',
+        description: 'A tall, majestic tree that provides shade and wood',
         cost: 20,
         offsetY: -8,
         demolitionCostMultiplier: 0.5,
@@ -135,6 +156,7 @@ export const DECORATION_DATA = {
     },
     pine: { 
         name: 'Pine Tree',
+        description: 'Smells like distant mountains and quiet snow',
         cost: 45,
         offsetY: -8,
         demolitionCostMultiplier: 0.5,
@@ -144,6 +166,7 @@ export const DECORATION_DATA = {
     },
     bush: { 
         name: 'Bush',
+        description: 'Small, leafy and suspiciously good at hiding things',
         cost: 15,
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
@@ -152,6 +175,7 @@ export const DECORATION_DATA = {
     },
     lamp: { 
         name: 'Lamp',
+        description: 'A warm glow, a cozy spot and stories that never end',
         cost: 75,
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
@@ -160,6 +184,7 @@ export const DECORATION_DATA = {
     },
     bench: {
         name: 'Bench',
+        description: 'Sit, sigh, chat and watch the village slowly grow',
         cost: 120,
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
@@ -182,6 +207,7 @@ export const DECORATION_DATA = {
 export const ROAD_DATA = {
     dirt: { 
         name: 'Dirt',
+        description: 'The first path every village draws with its footsteps',
         height: 17,
         cost: 10,
         demolitionCostMultiplier: 0.5,
@@ -191,29 +217,35 @@ export const ROAD_DATA = {
     },
     gravel: { 
         name: 'Gravel',
+        description: 'Crunchy steps and sturdy routes for busy feet',
         height: 17,
         cost: 20,
         demolitionCostMultiplier: 0.5,
         offsetY: 10,
         allowAdjacentPlacement: true,
+        expenseAmount: 0.1,
         sprite: 'sprites/gravel.png'
     },
     stone: { 
         name: 'Stone',
+        description: 'Grand roads for serious boots and serious business',
         height: 17,
         cost: 50,
         demolitionCostMultiplier: 0.5,
         offsetY: 10,
         allowAdjacentPlacement: true,
+        expenseAmount: 0.3,
         sprite: 'sprites/stone.png'
     },
     planks: { 
         name: 'Planks',
+        description: 'A creaky walkway that keeps feet dry and stories lively',
         height: 17,
         cost: 35,
         demolitionCostMultiplier: 0.5,
         offsetY: 10,
         allowAdjacentPlacement: true,
+        expenseAmount: 0.3,
         sprite: 'sprites/planks.png'
     }
 };

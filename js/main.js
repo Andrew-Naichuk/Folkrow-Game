@@ -64,6 +64,9 @@ class Game {
         // Start income generation system
         this.startIncomeGeneration();
         
+        // Start environment events system
+        this.startEnvironmentEvents();
+        
         // Initialize game loop timing
         this.lastFrameTime = Date.now();
         
@@ -158,6 +161,40 @@ class Game {
                 lastProcessed = now;
             }
         }, incomeInterval);
+    }
+
+    /**
+     * Start the environment events system
+     * Every 1 minute, spawns a random tree at an empty cell and removes a random tree
+     * This keeps the total balance of trees the same while making them appear/disappear dynamically
+     */
+    startEnvironmentEvents() {
+        const ENVIRONMENT_EVENT_INTERVAL = 60000; // 1 minute in milliseconds
+        
+        setInterval(() => {
+            // Find a random empty cell to spawn a tree
+            const emptyCell = this.gameState.findRandomEmptyCell();
+            
+            // Find a random existing tree to remove
+            const treeToRemove = this.gameState.findRandomTree();
+            
+            // Only proceed if we have both an empty cell and a tree to remove
+            // This ensures the total balance of trees stays the same
+            if (emptyCell && treeToRemove) {
+                // Randomly choose between 'tree' and 'pine' for the new tree
+                const treeTypes = ['tree', 'pine'];
+                const randomTreeType = treeTypes[Math.floor(Math.random() * treeTypes.length)];
+                
+                // Remove the old tree first
+                this.gameState.removeItemFree(treeToRemove.isoX, treeToRemove.isoY);
+                
+                // Spawn a new tree at the empty cell
+                this.gameState.placeItemFree(emptyCell.isoX, emptyCell.isoY, 'decoration', randomTreeType);
+                
+                console.log(`Environment event: Tree removed at (${treeToRemove.isoX}, ${treeToRemove.isoY}), new ${randomTreeType} spawned at (${emptyCell.isoX}, ${emptyCell.isoY})`);
+            }
+            // If either condition is not met, do nothing to maintain tree balance
+        }, ENVIRONMENT_EVENT_INTERVAL);
     }
 
     gameLoop() {

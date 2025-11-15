@@ -273,7 +273,7 @@ export class ToolSelector {
         
         // Description (if available)
         if (itemData.description) {
-            content += `<div class="info-panel-row"><span class="info-label">Description:</span><span class="info-value">${itemData.description}</span></div>`;
+            content += `<div class="info-panel-row"><span class="info-value-description">${itemData.description}</span></div>`;
         }
         
         // Cost
