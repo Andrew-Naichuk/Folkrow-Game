@@ -44,15 +44,13 @@
                 <div class="section-banner">
                     <h3>Tools</h3>
                 </div>
-                <div class="tool-grid">
-                    <div class="tool-item circular" data-type="tool" data-id="bulldozer">
+                <div class="tool-buttons-container">
+                    <div class="tool-item demolition-btn" data-type="tool" data-id="bulldozer">
                         <div class="tool-preview bulldozer-preview">💣</div>
                         <span>Annihilate</span>
                     </div>
+                    <button id="clear-btn" class="clear-btn">Start Over</button>
                 </div>
-            </div>
-            <div class="tool-section">
-                <button id="clear-btn" class="clear-btn circular">Clear All</button>
             </div>
         </div>
         <div class="canvas-container">
@@ -73,6 +71,31 @@
             </div>
         </div>
     </div>
+    
+    <!-- Start Over Confirmation Dialog -->
+    <div id="start-over-dialog" class="modal-overlay" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div class="banner-ornament">✦</div>
+                <h3>Start Over?</h3>
+            </div>
+            <div class="modal-content">
+                <p>This will reset everything including:</p>
+                <ul>
+                    <li>All placed buildings and items</li>
+                    <li>Your budget and progress</li>
+                    <li>The entire map (will be regenerated)</li>
+                    <li>All villagers</li>
+                </ul>
+                <p class="modal-warning">This action cannot be undone!</p>
+            </div>
+            <div class="modal-actions">
+                <button id="dialog-cancel-btn" class="dialog-btn dialog-btn-cancel">Cancel</button>
+                <button id="dialog-confirm-btn" class="dialog-btn dialog-btn-confirm">Start Over</button>
+            </div>
+        </div>
+    </div>
+    
     <script type="module" src="js/main.js"></script>
 </body>
 </html>

@@ -217,15 +217,32 @@ export class GameState {
     }
 
     /**
-     * Clear all placed items
+     * Complete game reset - resets everything to initial state
+     * This includes clearing all items, resetting budget, population, and regenerating the map
      */
-    clearAll() {
+    resetGame() {
+        // Clear all placed items
         this.placedItems = [];
-        this.population = 0; // Reset population when clearing all
-        this.unemployedPopulation = 0; // Reset unemployed population when clearing all
         
-        // Save state to localStorage
-        this.saveToLocalStorage();
+        // Reset budget to initial value
+        this.budget = CONFIG.INITIAL_BUDGET;
+        
+        // Reset population
+        this.population = 0;
+        this.unemployedPopulation = 0;
+        
+        // Clear selected tool
+        this.clearSelectedTool();
+        
+        // Clear localStorage to ensure a fresh start
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (error) {
+            console.warn('Failed to clear localStorage:', error);
+        }
+        
+        // Regenerate the initial map
+        this.initializeInitialMap();
     }
 
     /**

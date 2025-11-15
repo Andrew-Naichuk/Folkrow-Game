@@ -58,7 +58,7 @@ class Game {
         
         // Initialize UI
         this.toolSelector = new ToolSelector(this.gameState, this.renderer, this.mouseHandler, this.spriteManager);
-        this.clearButton = new ClearButton(this.gameState, this.renderer);
+        this.clearButton = new ClearButton(this.gameState, this.renderer, this.villagerManager, this.camera);
         this.statsPanel = new StatsPanel(this.gameState, this.renderer);
         
         // Initialize income generation system (now integrated into game loop)

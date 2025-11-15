@@ -433,15 +433,30 @@ body {
     transform: scale(0.95);
 }
 
+.tool-buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.demolition-btn {
+    width: 100%;
+    max-width: none;
+    aspect-ratio: auto;
+    height: auto;
+    min-height: 60px;
+    border-radius: 8px;
+}
+
 .clear-btn {
-    width: 100px;
-    height: 100px;
+    width: 100%;
     padding: 12px;
     background: linear-gradient(135deg, #d4a8a8 0%, #c9968b 100%);
     color: #5d2f4a;
     border: 3px solid #a86b9a;
     border-style: double;
-    border-radius: 50%;
+    border-radius: 8px;
     cursor: pointer;
     font-family: 'Kalam', cursive;
     font-size: 14px;
@@ -450,7 +465,6 @@ body {
     box-shadow: 
         inset 0 2px 4px rgba(168, 107, 154, 0.2),
         0 3px 6px rgba(139, 111, 71, 0.2);
-    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -705,4 +719,182 @@ body {
 .info-value.expense {
     color: #8b3d2f;
     font-weight: 600;
+}
+
+/* Modal Dialog Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(61, 47, 31, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-dialog {
+    background: linear-gradient(180deg, #b5cbad 0%, #5f9262 100%);
+    border: 4px solid #8b6f47;
+    border-style: double;
+    border-radius: 16px;
+    box-shadow: 
+        inset 0 2px 4px rgba(139, 111, 71, 0.2),
+        0 8px 24px rgba(139, 111, 71, 0.5);
+    min-width: 400px;
+    max-width: 500px;
+    padding: 0;
+    animation: slideIn 0.3s ease;
+    position: relative;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: linear-gradient(180deg, #c8dcc1 0%, #91cc95 100%);
+    padding: 20px 24px;
+    border-bottom: 3px solid #8b6f47;
+    border-radius: 12px 12px 0 0;
+    text-align: center;
+    position: relative;
+}
+
+.modal-header .banner-ornament {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    color: #8b6f47;
+    opacity: 0.6;
+}
+
+.modal-header h3 {
+    color: #5d4a2f;
+    margin: 8px 0 0 0;
+    font-size: 28px;
+    font-weight: 700;
+    font-family: 'Caveat', cursive;
+    text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8), -1px -1px 0px rgba(139, 111, 71, 0.3);
+    letter-spacing: 1px;
+}
+
+.modal-content {
+    padding: 24px;
+    color: #3d2f1f;
+    font-family: 'Kalam', cursive;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.modal-content p {
+    margin: 0 0 12px 0;
+    font-weight: 500;
+}
+
+.modal-content ul {
+    margin: 12px 0;
+    padding-left: 24px;
+    list-style-type: none;
+}
+
+.modal-content ul li {
+    margin: 8px 0;
+    position: relative;
+    padding-left: 20px;
+}
+
+.modal-content ul li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #8b6f47;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.modal-warning {
+    margin-top: 16px !important;
+    font-weight: 600 !important;
+    color: #8b3d2f !important;
+    text-align: left;
+    font-size: 16px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 16px;
+    padding: 16px 24px 24px 24px;
+    justify-content: space-between;
+}
+
+.dialog-btn {
+    padding: 12px 24px;
+    border: 3px solid;
+    border-style: double;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Kalam', cursive;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 
+        inset 0 2px 4px rgba(139, 111, 71, 0.2),
+        0 3px 6px rgba(139, 111, 71, 0.2);
+    min-width: 120px;
+    flex: 1;
+}
+
+.dialog-btn-cancel {
+    background: linear-gradient(135deg, #a8d5ba 0%, #8bc9a0 100%);
+    color: #3d2f1f;
+    border-color: #6b9c7a;
+}
+
+.dialog-btn-cancel:hover {
+    background: linear-gradient(135deg, #b8e5ca 0%, #9bd9b0 100%);
+    transform: scale(1.05);
+    box-shadow: 
+        inset 0 2px 4px rgba(107, 156, 122, 0.3),
+        0 5px 10px rgba(139, 111, 71, 0.4);
+}
+
+.dialog-btn-confirm {
+    background: linear-gradient(135deg, #d4a8a8 0%, #c9968b 100%);
+    color: #5d2f4a;
+    border-color: #a86b9a;
+}
+
+.dialog-btn-confirm:hover {
+    background: linear-gradient(135deg, #e4b8b8 0%, #d9a69b 100%);
+    transform: scale(1.05);
+    box-shadow: 
+        inset 0 2px 4px rgba(168, 107, 154, 0.3),
+        0 5px 10px rgba(139, 111, 71, 0.4);
+}
+
+.dialog-btn:active {
+    transform: scale(0.95);
 }
