@@ -142,6 +142,9 @@ class Game {
             
             // Process income generation
             if (this.incomeGenerators.size > 0) {
+                // Get production multiplier to apply to all income
+                const productionMultiplier = this.gameState.getProductionMultiplier();
+                
                 this.incomeGenerators.forEach((incomeData, buildingId) => {
                     // Count buildings of this type
                     const buildingCount = placedItems.filter(item => 
@@ -149,7 +152,8 @@ class Game {
                     ).length;
                     
                     if (buildingCount > 0) {
-                        const totalIncome = buildingCount * incomeData.amount;
+                        // Apply production multiplier to income
+                        const totalIncome = buildingCount * incomeData.amount * productionMultiplier;
                         this.gameState.addBudget(totalIncome);
                         
                         // Trigger budget display animation

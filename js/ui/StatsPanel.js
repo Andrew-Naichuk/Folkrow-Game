@@ -10,6 +10,8 @@ export class StatsPanel {
         this.expensesElement = document.getElementById('expenses-display');
         this.populationElement = document.getElementById('population-display');
         this.unemployedElement = document.getElementById('unemployed-display');
+        this.productionElement = document.getElementById('production-display');
+        this.productionWarningElement = document.getElementById('production-warning');
         
         // Initial update
         this.update();
@@ -35,7 +37,7 @@ export class StatsPanel {
     update() {
         if (this.budgetElement) {
             const budget = this.gameState.getBudget();
-            this.budgetElement.textContent = `Budget: ⍱${budget.toLocaleString()}`;
+            this.budgetElement.textContent = `Budget: ⍱${budget.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             
             // Add visual feedback for low budget
             if (budget < 500) {
@@ -47,12 +49,12 @@ export class StatsPanel {
 
         if (this.incomeElement) {
             const income = this.gameState.getTotalIncomePerInterval();
-            this.incomeElement.textContent = `Income: ⍱${income.toLocaleString()}`;
+            this.incomeElement.textContent = `Income: ⍱${income.toFixed(2)}`;
         }
 
         if (this.expensesElement) {
             const expenses = this.gameState.getTotalExpensesPerInterval();
-            this.expensesElement.textContent = `Expenses: ⍱${expenses.toLocaleString()}`;
+            this.expensesElement.textContent = `Expenses: ⍱${expenses.toFixed(2)}`;
         }
 
         if (this.populationElement) {
@@ -63,6 +65,22 @@ export class StatsPanel {
         if (this.unemployedElement) {
             const unemployed = this.gameState.getUnemployedPopulation();
             this.unemployedElement.textContent = `Unemployed: ${unemployed.toLocaleString()}`;
+        }
+
+        if (this.productionElement) {
+            const productionMultiplier = this.gameState.getProductionMultiplier();
+            const productionPercent = (productionMultiplier * 100).toFixed(2);
+            this.productionElement.textContent = `Production: ${productionPercent}%`;
+        }
+
+        // Show/hide production warning based on production multiplier
+        if (this.productionWarningElement) {
+            const productionMultiplier = this.gameState.getProductionMultiplier();
+            if (productionMultiplier < 1) {
+                this.productionWarningElement.style.display = 'block';
+            } else {
+                this.productionWarningElement.style.display = 'none';
+            }
         }
     }
 
@@ -82,7 +100,7 @@ export class StatsPanel {
         // Create a temporary element to show the income gain
         const incomeIndicator = document.createElement('div');
         incomeIndicator.className = 'income-indicator';
-        incomeIndicator.textContent = `+⍱${incomeAmount}`;
+        incomeIndicator.textContent = `+⍱${incomeAmount.toFixed(2)}`;
         this.budgetElement.appendChild(incomeIndicator);
         
         // Remove animation class and indicator after animation completes

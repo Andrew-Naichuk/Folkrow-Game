@@ -16,6 +16,8 @@ export class GameState {
         this.budget = CONFIG.INITIAL_BUDGET;
         this.population = 0; // Initial population is 0
         this.unemployedPopulation = 0; // Initial unemployed population is 0 (equals population by default)
+        this.workersRequired = 0; // Total workers required by all placed items
+        this.productionMultiplier = 1; // Production multiplier (1 = full production, <1 = reduced)
         
         // Load saved state from localStorage
         const hasSavedState = this.loadFromLocalStorage();
@@ -178,15 +180,19 @@ export class GameState {
                 current: this.unemployedPopulation,
                 required: required,
                 label: 'Workers'
-            })
-            // Add more requirement types here as needed
-            // Example:
-            // specificBuilding: (required) => ({
-            //     met: this.hasBuilding(required),
-            //     current: this.countBuildings(required),
-            //     required: 1,
-            //     label: `${required} building`
-            // })
+            }),
+            building: (required) => {
+                const buildingId = required;
+                const hasBuilding = this.hasBuilding(buildingId);
+                const buildingData = BUILDING_DATA[buildingId];
+                const buildingName = buildingData ? buildingData.name : buildingId;
+                return {
+                    met: hasBuilding,
+                    current: hasBuilding ? 1 : 0,
+                    required: 1,
+                    label: buildingName
+                };
+            }
         };
     }
 
@@ -276,6 +282,16 @@ export class GameState {
             itemData = ROAD_DATA[id];
         }
         
+        // Get the new item's worker requirement (if any)
+        const newItemWorkerRequirement = (itemData && itemData.requires && itemData.requires.unemployedPopulation) 
+            ? itemData.requires.unemployedPopulation 
+            : 0;
+        
+        // Calculate workers required AFTER placing the item (to check for shortage)
+        const workersRequiredBefore = this.calculateWorkersRequired();
+        const workersRequiredAfter = workersRequiredBefore + newItemWorkerRequirement;
+        const currentWorkers = this.population - this.unemployedPopulation;
+        
         // Deduct cost and place item
         const cost = this.getItemCost(type, id);
         this.budget -= cost;
@@ -290,15 +306,27 @@ export class GameState {
         
         // Add population if this is a house
         if (type === 'building' && itemData && itemData.population) {
-            this.population += itemData.population;
-            this.unemployedPopulation += itemData.population; // New population is unemployed by default
+            const newPopulation = itemData.population;
+            this.population += newPopulation;
+            
+            // Calculate shortage AFTER including the new item's requirement
+            const shortageAfter = Math.max(0, workersRequiredAfter - currentWorkers);
+            
+            // If there's a worker shortage, assign new people to work instead of unemployed
+            if (shortageAfter > 0) {
+                const workersToAssign = Math.min(newPopulation, shortageAfter);
+                // Assign workersToAssign to work, rest to unemployed
+                this.unemployedPopulation += (newPopulation - workersToAssign);
+            } else {
+                // No shortage, all new population is unemployed
+                this.unemployedPopulation += newPopulation;
+            }
         }
         
         // Handle item placement - convert unemployed villagers to workers if required
-        if (itemData && itemData.requires && itemData.requires.unemployedPopulation) {
-            const required = itemData.requires.unemployedPopulation;
+        if (newItemWorkerRequirement > 0) {
             // Convert required number of unemployed villagers to workers
-            this.unemployedPopulation = Math.max(0, this.unemployedPopulation - required);
+            this.unemployedPopulation = Math.max(0, this.unemployedPopulation - newItemWorkerRequirement);
         }
         
         // Safety check: ensure unemployed never exceeds total population
@@ -324,6 +352,8 @@ export class GameState {
         // Reset population
         this.population = 0;
         this.unemployedPopulation = 0;
+        this.workersRequired = 0;
+        this.productionMultiplier = 1;
         
         // Clear selected tool
         this.clearSelectedTool();
@@ -381,13 +411,7 @@ export class GameState {
         // Deduct demolition cost
         this.budget -= demolitionCost;
         
-        // Subtract population if this is a house
-        if (item.type === 'building' && BUILDING_DATA[item.id] && BUILDING_DATA[item.id].population) {
-            this.population = Math.max(0, this.population - BUILDING_DATA[item.id].population);
-            this.unemployedPopulation = Math.max(0, this.unemployedPopulation - BUILDING_DATA[item.id].population);
-        }
-        
-        // Handle item demolition - restore unemployed villagers (only if there's population left)
+        // Get item data before removal
         let itemData = null;
         if (item.type === 'building' && BUILDING_DATA[item.id]) {
             itemData = BUILDING_DATA[item.id];
@@ -397,21 +421,58 @@ export class GameState {
             itemData = ROAD_DATA[item.id];
         }
         
-        if (itemData && itemData.requires && itemData.requires.unemployedPopulation) {
-            const required = itemData.requires.unemployedPopulation;
-            // Only restore unemployed if there's still population
-            // The workers were part of the population, so we can restore them to unemployed
-            // But we need to ensure unemployed doesn't exceed total population
+        // Get the item's worker requirement (if any) before removal
+        const itemWorkerRequirement = (itemData && itemData.requires && itemData.requires.unemployedPopulation) 
+            ? itemData.requires.unemployedPopulation 
+            : 0;
+        
+        // Get the item's population (if it's a house) before removal
+        const itemPopulation = (item.type === 'building' && itemData && itemData.population) 
+            ? itemData.population 
+            : 0;
+        
+        // Remove the item first to calculate workersRequired after removal
+        this.placedItems.splice(itemIndex, 1);
+        
+        // Calculate workers required after removal
+        const workersRequiredAfter = this.calculateWorkersRequired();
+        
+        // Subtract population if this is a house
+        if (itemPopulation > 0) {
+            this.population = Math.max(0, this.population - itemPopulation);
+            
+            // When removing a house, we need to account for workers that were assigned from that house
+            // If the building required workers, some of the house's population were working
+            // We should only reduce unemployed by the number who were actually unemployed
+            // Since we don't track per-house assignments, we use a heuristic:
+            // - If there's a worker requirement, assume those workers came from this house
+            // - Reduce unemployed by (house population - worker requirement), but not less than 0
+            const unemployedFromHouse = Math.max(0, itemPopulation - itemWorkerRequirement);
+            this.unemployedPopulation = Math.max(0, this.unemployedPopulation - unemployedFromHouse);
+        }
+        
+        // Handle item demolition - restore workers to unemployed (only if there's population left)
+        if (itemWorkerRequirement > 0) {
+            // The workers that were assigned to this building are now free
+            // Restore them to unemployed if there's still population
             if (this.population > 0) {
-                this.unemployedPopulation = Math.min(this.population, this.unemployedPopulation + required);
+                this.unemployedPopulation = Math.min(this.population, this.unemployedPopulation + itemWorkerRequirement);
+            }
+            
+            // Check if there's still a worker shortage after removal
+            // If so, reassign the newly unemployed workers back to work
+            const currentWorkers = this.population - this.unemployedPopulation;
+            
+            if (workersRequiredAfter > currentWorkers) {
+                const shortage = workersRequiredAfter - currentWorkers;
+                const workersToReassign = Math.min(this.unemployedPopulation, shortage);
+                // Reassign workers back to work
+                this.unemployedPopulation = Math.max(0, this.unemployedPopulation - workersToReassign);
             }
         }
         
         // Safety check: ensure unemployed never exceeds total population
         this.unemployedPopulation = Math.min(this.population, this.unemployedPopulation);
-        
-        // Remove the item
-        this.placedItems.splice(itemIndex, 1);
         
         // Save state to localStorage
         this.saveToLocalStorage();
@@ -616,8 +677,83 @@ export class GameState {
     }
 
     /**
+     * Calculate total workers required by all placed items
+     * @returns {number} Total workers required
+     */
+    calculateWorkersRequired() {
+        let totalWorkers = 0;
+        
+        this.placedItems.forEach(item => {
+            let itemData = null;
+            if (item.type === 'building' && BUILDING_DATA[item.id]) {
+                itemData = BUILDING_DATA[item.id];
+            } else if (item.type === 'decoration' && DECORATION_DATA[item.id]) {
+                itemData = DECORATION_DATA[item.id];
+            } else if (item.type === 'road' && ROAD_DATA[item.id]) {
+                itemData = ROAD_DATA[item.id];
+            }
+            
+            if (itemData && itemData.requires && itemData.requires.unemployedPopulation) {
+                totalWorkers += itemData.requires.unemployedPopulation;
+            }
+        });
+        
+        return totalWorkers;
+    }
+
+    /**
+     * Calculate production multiplier based on population and workers required
+     * @returns {number} Production multiplier (1 if enough workers, <1 if insufficient)
+     */
+    calculateProductionMultiplier() {
+        this.workersRequired = this.calculateWorkersRequired();
+        
+        // Calculate actual available workers (population minus unemployed)
+        const availableWorkers = this.population - this.unemployedPopulation;
+        
+        // Handle edge cases
+        if (this.workersRequired === 0) {
+            // No workers required, full production
+            return 1;
+        }
+        
+        if (availableWorkers <= 0) {
+            // No available workers, no production
+            return 0;
+        }
+        
+        if (this.workersRequired > availableWorkers) {
+            // If more workers required than available, production is reduced proportionally
+            return availableWorkers / this.workersRequired;
+        } else {
+            // If enough or more available workers than required, full production
+            return 1;
+        }
+    }
+
+    /**
+     * Get current workers required
+     * @returns {number} Current workers required
+     */
+    getWorkersRequired() {
+        return this.workersRequired;
+    }
+
+    /**
+     * Get current production multiplier
+     * Recalculates it to ensure it's up to date
+     * @returns {number} Current production multiplier
+     */
+    getProductionMultiplier() {
+        // Recalculate to ensure it's always up to date
+        this.productionMultiplier = this.calculateProductionMultiplier();
+        return this.productionMultiplier;
+    }
+
+    /**
      * Calculate total income generated per interval from all placed buildings
-     * @returns {number} Total income per interval
+     * Applies production multiplier if workers are insufficient
+     * @returns {number} Total income per interval (after production multiplier)
      */
     getTotalIncomePerInterval() {
         let totalIncome = 0;
@@ -631,7 +767,11 @@ export class GameState {
             }
         });
         
-        return totalIncome;
+        // Update production multiplier based on current state
+        this.productionMultiplier = this.calculateProductionMultiplier();
+        
+        // Apply production multiplier to income
+        return totalIncome * this.productionMultiplier;
     }
 
     /**
@@ -711,9 +851,29 @@ export class GameState {
      * @returns {boolean} True if player has at least one Stonecutter
      */
     hasStonecutter() {
+        return this.hasBuilding('stonecutter');
+    }
+
+    /**
+     * Check if player has at least one building of the specified type
+     * @param {string} buildingId - The building ID to check for
+     * @returns {boolean} True if player has at least one building of this type
+     */
+    hasBuilding(buildingId) {
         return this.placedItems.some(item => 
-            item.type === 'building' && item.id === 'stonecutter'
+            item.type === 'building' && item.id === buildingId
         );
+    }
+
+    /**
+     * Count how many buildings of the specified type the player has
+     * @param {string} buildingId - The building ID to count
+     * @returns {number} Number of buildings of this type
+     */
+    countBuildings(buildingId) {
+        return this.placedItems.filter(item => 
+            item.type === 'building' && item.id === buildingId
+        ).length;
     }
 
     /**

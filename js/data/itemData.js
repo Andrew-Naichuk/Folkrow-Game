@@ -119,7 +119,7 @@ export const BUILDING_DATA = {
         requires: {
             unemployedPopulation: 1
         },
-        // allows to remove trees, pine, stump, and roots from the map
+        // allows to remove trees, pine, stump, and roots, allows to place planks roads
     },
     stonecutter: { 
         name: 'Stonecutter',
@@ -134,7 +134,7 @@ export const BUILDING_DATA = {
         requires: {
             unemployedPopulation: 1
         },
-        // allows to remove stones and boulders from the map
+        // allows to remove stones and boulders, allows to place gravel and stone roards
     },
     campfire: { 
         name: 'Campfire',
@@ -274,7 +274,10 @@ export const ROAD_DATA = {
         offsetY: 10,
         allowAdjacentPlacement: true,
         expenseAmount: 0.1,
-        sprite: 'sprites/gravel.png'
+        sprite: 'sprites/gravel.png',
+        requires: {
+            building: 'stonecutter'
+        }
     },
     stone: { 
         name: 'Stone',
@@ -285,7 +288,10 @@ export const ROAD_DATA = {
         offsetY: 10,
         allowAdjacentPlacement: true,
         expenseAmount: 0.3,
-        sprite: 'sprites/stone.png'
+        sprite: 'sprites/stone.png',
+        requires: {
+            building: 'stonecutter'
+        }
     },
     planks: { 
         name: 'Planks',
@@ -296,6 +302,9 @@ export const ROAD_DATA = {
         offsetY: 10,
         allowAdjacentPlacement: true,
         expenseAmount: 0.3,
-        sprite: 'sprites/planks.png'
+        sprite: 'sprites/planks.png',
+        requires: {
+            building: 'woodcutter'
+        }
     }
 };
