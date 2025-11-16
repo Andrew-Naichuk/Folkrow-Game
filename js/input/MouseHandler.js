@@ -1,17 +1,18 @@
 import { screenToTile, tileToWorld, worldToScreen, screenToWorld } from '../utils/coordinateUtils.js';
 import { CONFIG } from '../config.js';
-import { BUILDING_DATA } from '../data/itemData.js';
+import { BUILDING_DATA, DECORATION_DATA, ROAD_DATA } from '../data/itemData.js';
 
 /**
  * Handles mouse input events
  */
 export class MouseHandler {
-    constructor(canvas, renderer, gameState, cursorInfo, toast = null) {
+    constructor(canvas, renderer, gameState, cursorInfo, toast = null, tooltip = null) {
         this.canvas = canvas;
         this.renderer = renderer;
         this.gameState = gameState;
         this.cursorInfo = cursorInfo;
         this.toast = toast;
+        this.tooltip = tooltip;
         this.mouseX = 0;
         this.mouseY = 0;
         this.globalMouseX = 0;
@@ -20,6 +21,9 @@ export class MouseHandler {
         // Middle mouse button drag state
         this.isDragging = false;
         this.dragStart = null;
+        
+        // Hover state for tooltip
+        this.hoveredItem = null;
         
         // Create custom cursor element
         this.customCursor = this.createCustomCursor();
@@ -248,11 +252,14 @@ export class MouseHandler {
             );
             this.cursorInfo.textContent = `Grid: (${iso.x}, ${iso.y})`;
             
+            // Check for hover over items with hoverText
+            this.checkHoverForTooltip(iso.x, iso.y, e.clientX, e.clientY);
+            
             this.renderer.updateMousePosition(this.mouseX, this.mouseY);
             this.renderer.render();
         });
 
-        // Handle mouse leaving canvas - stop dragging
+        // Handle mouse leaving canvas - stop dragging and hide tooltip
         this.canvas.addEventListener('mouseleave', (e) => {
             if (this.isDragging) {
                 this.isDragging = false;
@@ -262,6 +269,11 @@ export class MouseHandler {
                 this.canvas.style.cursor = 'default';
             }
             this.customCursor.style.display = 'none';
+            // Hide tooltip when leaving canvas
+            if (this.tooltip) {
+                this.tooltip.hide();
+            }
+            this.hoveredItem = null;
         });
 
         // Set cursor on mouse enter
@@ -455,7 +467,68 @@ export class MouseHandler {
             this.customCursor.style.display = 'none';
             // Re-enable UI interaction
             this.enableUIInteraction();
+            // Tooltip will be shown again on next mousemove if hovering over item with hoverText
             this.renderer.render();
+        }
+    }
+
+    /**
+     * Check for hover over items with hoverText and show/hide tooltip
+     * @param {number} isoX - Isometric X coordinate
+     * @param {number} isoY - Isometric Y coordinate
+     * @param {number} clientX - Mouse client X coordinate
+     * @param {number} clientY - Mouse client Y coordinate
+     */
+    checkHoverForTooltip(isoX, isoY, clientX, clientY) {
+        if (!this.tooltip) {
+            return;
+        }
+
+        // Don't show tooltip while dragging or when tool is selected
+        if (this.isDragging || this.gameState.getSelectedTool()) {
+            if (this.hoveredItem) {
+                this.tooltip.hide();
+                this.hoveredItem = null;
+            }
+            return;
+        }
+
+        // Find item at this position
+        const placedItems = this.gameState.getPlacedItems();
+        const item = placedItems.find(item => 
+            item.isoX === isoX && item.isoY === isoY
+        );
+
+        if (item) {
+            // Get item data
+            let itemData = null;
+            if (item.type === 'building' && BUILDING_DATA[item.id]) {
+                itemData = BUILDING_DATA[item.id];
+            } else if (item.type === 'decoration' && DECORATION_DATA[item.id]) {
+                itemData = DECORATION_DATA[item.id];
+            } else if (item.type === 'road' && ROAD_DATA[item.id]) {
+                itemData = ROAD_DATA[item.id];
+            }
+
+            // Check if item has hoverText
+            if (itemData && itemData.hoverText) {
+                // Check if this is the same item we're already hovering
+                const itemKey = `${item.isoX},${item.isoY}`;
+                if (this.hoveredItem !== itemKey) {
+                    this.hoveredItem = itemKey;
+                    this.tooltip.show(itemData.hoverText, clientX, clientY);
+                } else {
+                    // Update tooltip position in case mouse moved
+                    this.tooltip.show(itemData.hoverText, clientX, clientY);
+                }
+                return;
+            }
+        }
+
+        // No item with hoverText at this position
+        if (this.hoveredItem) {
+            this.tooltip.hide();
+            this.hoveredItem = null;
         }
     }
 

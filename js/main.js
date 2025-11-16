@@ -9,6 +9,7 @@ import { ToolSelector } from './ui/ToolSelector.js';
 import { ClearButton } from './ui/ClearButton.js';
 import { StatsPanel } from './ui/StatsPanel.js';
 import { Toast } from './ui/Toast.js';
+import { Tooltip } from './ui/Tooltip.js';
 import { SpriteManager } from './utils/SpriteManager.js';
 import { BUILDING_DATA, DECORATION_DATA, ROAD_DATA } from './data/itemData.js';
 import { CONFIG } from './config.js';
@@ -48,6 +49,7 @@ class Game {
         // Initialize UI components
         const cursorInfo = document.getElementById('cursor-info');
         this.toast = new Toast();
+        this.tooltip = new Tooltip();
         
         // Initialize input handlers
         this.mouseHandler = new MouseHandler(
@@ -55,7 +57,8 @@ class Game {
             this.renderer,
             this.gameState,
             cursorInfo,
-            this.toast
+            this.toast,
+            this.tooltip
         );
         // Set mouse handler in renderer so it can access global mouse position
         this.renderer.setMouseHandler(this.mouseHandler);

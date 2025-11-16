@@ -20,11 +20,11 @@ export const BUILDING_DATA = {
         height: 18, 
         width: 1,
         cost: 300,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.2,
         sprite: 'sprites/house1.png',
         offsetY: 0,
         population: 2,
-        expenseAmount: 2
+        expenseAmount: 1.3
     },
     house2: { 
         name: 'Stone house',
@@ -32,13 +32,13 @@ export const BUILDING_DATA = {
         height: 20, 
         width: 1,
         cost: 600,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.3,
         sprite: 'sprites/house2.png',
         offsetY: 0,
         population: 4,
-        expenseAmount: 3,
+        expenseAmount: 2.2,
         requires: {
-            population: 10,
+            population: 8,
         }
     },
     timberman: {
@@ -47,13 +47,13 @@ export const BUILDING_DATA = {
         height: 20,
         width: 1,
         cost: 1000,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.3,
         incomeAmount: 14,
         expenseAmount: 5,
         sprite: 'sprites/timberman.png',
         offsetY: 0,
         requires: {
-            population: 20,
+            population: 14,
             unemployedPopulation: 3,
         }
         // allows to remove trees, pine, stump, and roots from the map
@@ -70,7 +70,7 @@ export const BUILDING_DATA = {
         incomeAmount: 26,
         expenseAmount: 9,
         requires: {
-            population: 40,
+            population: 24,
             unemployedPopulation: 4
         }
     },
@@ -79,8 +79,8 @@ export const BUILDING_DATA = {
         description: 'A humble patch of grain that keeps bellies and coffers full',
         height: 15,
         width: 1,
-        cost: 120,
-        demolitionCostMultiplier: 0.5,
+        cost: 110,
+        demolitionCostMultiplier: 0.1,
         sprite: 'sprites/wheat.png',
         incomeAmount: 3,
         expenseAmount: 1,
@@ -96,13 +96,14 @@ export const BUILDING_DATA = {
         height: 20, 
         width: 1,
         cost: 700,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.2,
         sprite: 'sprites/shop.png',
         offsetY: 5,
         incomeAmount: 9,
         expenseAmount: 3,
         allowAdjacentPlacement: true,
         requires: {
+            population: 8,
             unemployedPopulation: 2
         }
     },
@@ -112,10 +113,10 @@ export const BUILDING_DATA = {
         height: 20, 
         width: 1,
         cost: 170,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.1,
         sprite: 'sprites/woodcutter.png',
         offsetY: 7,
-        expenseAmount: 0.5,
+        expenseAmount: 0.3,
         requires: {
             unemployedPopulation: 1
         },
@@ -127,10 +128,10 @@ export const BUILDING_DATA = {
         height: 20, 
         width: 1,
         cost: 200,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.3,
         sprite: 'sprites/stonecutter.png',
         offsetY: -2,
-        expenseAmount: 0.5,
+        expenseAmount: 0.3,
         requires: {
             unemployedPopulation: 1
         },
@@ -142,7 +143,7 @@ export const BUILDING_DATA = {
         height: 20, 
         width: 1,
         cost: 75,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.1,
         sprite: 'sprites/campfire.png',
         offsetY: 10,
         expenseAmount: 1,
@@ -154,7 +155,7 @@ export const BUILDING_DATA = {
         height: 20, 
         width: 1,
         cost: 150,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.1,
         sprite: 'sprites/well.png',
         offsetY: 4,
         expenseAmount: 1,
@@ -168,9 +169,10 @@ export const DECORATION_DATA = {
     tree: { 
         name: 'Tree',
         description: 'A tall, majestic tree that provides shade and wood. Can fall on itself but requires a woodcutter or timberman to remove',
+        hoverText: 'Needs proper tools to remove',
         cost: 20,
         offsetY: -8,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.2,
         allowAdjacentPlacement: true,
         sprite: 'sprites/tree.png',
         // requires a woodcutter or timberman to remove
@@ -178,48 +180,53 @@ export const DECORATION_DATA = {
     pine: { 
         name: 'Pine Tree',
         description: 'Smells like distant mountains and quiet snow. Can fall on itself but requires a woodcutter or timberman to remove',
+        hoverText: 'Needs proper tools to remove',
         cost: 45,
         offsetY: -8,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.2,
         allowAdjacentPlacement: true,
         sprite: 'sprites/pine.png',
         // requires a woodcutter or timberman to remove
     },
     stump: { 
         name: 'Stump',
-        description: 'A sad, dead tree that only creates problems. Requires a woodcutter or timberman to remove',
+        description: 'What’s left of an old tree. Requires a woodcutter or timberman to remove',
+        hoverText: 'Needs proper tools to remove',
         cost: 5,
         offsetY: 5,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.8,
         allowAdjacentPlacement: false,
         sprite: 'sprites/stump.png',
         // requires a woodcutter or timberman to remove
     },
     roots: { 
         name: 'Roots',
-        description: 'A bunch of roots that look like they couldn\'t be any more annoying. Requires a woodcutter or timberman to remove',
+        description: 'Overgrown roots tangled in the soil. Requires a woodcutter or timberman to remove',
+        hoverText: 'Needs proper tools to remove',
         cost: 5,
         offsetY: 9,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.8,
         allowAdjacentPlacement: false,
         sprite: 'sprites/roots.png',
         // requires a woodcutter or timberman to remove
     },
     rocks: { 
         name: 'Rocks',
-        description: 'Hard, heavy and cool',
+        description: 'Hard, heavy and cool. Requires a stonecutter to remove',
+        hoverText: 'Needs proper tools to remove',
         cost: 20,
         offsetY: 8,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.8,
         allowAdjacentPlacement: true,
         sprite: 'sprites/rocks.png',
     },
     boulder: { 
         name: 'Boulder',
-        description: 'Big and not very friendly',
+        description: 'Big and not very friendly. Requires a stonecutter to remove',
+        hoverText: 'Needs proper tools to remove',
         cost: 30,
         offsetY: 4,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.8,
         allowAdjacentPlacement: true,
         sprite: 'sprites/boulder.png',
     },
@@ -236,7 +243,7 @@ export const DECORATION_DATA = {
         name: 'Lamp',
         description: 'A warm glow, a cozy spot and stories that never end',
         cost: 75,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.3,
         allowAdjacentPlacement: true,
         offsetY: 5,
         sprite: 'sprites/lamp.png'
@@ -245,7 +252,7 @@ export const DECORATION_DATA = {
         name: 'Bench',
         description: 'Sit, sigh, chat and watch the village slowly grow',
         cost: 120,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.3,
         allowAdjacentPlacement: true,
         offsetY: 5,
         sprite: 'sprites/bench.png'
@@ -284,7 +291,7 @@ export const ROAD_DATA = {
         description: 'Grand roads for serious boots and serious business',
         height: 17,
         cost: 50,
-        demolitionCostMultiplier: 0.5,
+        demolitionCostMultiplier: 0.3,
         offsetY: 10,
         allowAdjacentPlacement: true,
         expenseAmount: 0.3,
