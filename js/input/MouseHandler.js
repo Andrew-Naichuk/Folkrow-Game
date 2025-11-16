@@ -6,11 +6,12 @@ import { BUILDING_DATA } from '../data/itemData.js';
  * Handles mouse input events
  */
 export class MouseHandler {
-    constructor(canvas, renderer, gameState, cursorInfo) {
+    constructor(canvas, renderer, gameState, cursorInfo, toast = null) {
         this.canvas = canvas;
         this.renderer = renderer;
         this.gameState = gameState;
         this.cursorInfo = cursorInfo;
+        this.toast = toast;
         this.mouseX = 0;
         this.mouseY = 0;
         this.globalMouseX = 0;
@@ -327,11 +328,9 @@ export class MouseHandler {
                     // Check if trying to destroy a tree, pine, stump, or roots - requires Woodcutter or Timberman
                     if (item.type === 'decoration' && (item.id === 'tree' || item.id === 'pine' || item.id === 'stump' || item.id === 'roots')) {
                         if (!this.gameState.hasWoodcutterOrTimberman()) {
-                            const originalText = this.cursorInfo.textContent;
-                            this.cursorInfo.textContent = 'You need at least one Woodcutter or Timberman to remove trees, stumps, or roots!';
-                            setTimeout(() => {
-                                this.cursorInfo.textContent = originalText;
-                            }, 2000);
+                            if (this.toast) {
+                                this.toast.warning('You need at least one Woodcutter or Timberman to remove trees, stumps, or roots!');
+                            }
                             return;
                         }
                     }
@@ -339,11 +338,9 @@ export class MouseHandler {
                     // Check if trying to destroy rocks or boulder - requires Stonecutter
                     if (item.type === 'decoration' && (item.id === 'rocks' || item.id === 'boulder')) {
                         if (!this.gameState.hasStonecutter()) {
-                            const originalText = this.cursorInfo.textContent;
-                            this.cursorInfo.textContent = 'You need at least one Stonecutter to remove rocks or boulders!';
-                            setTimeout(() => {
-                                this.cursorInfo.textContent = originalText;
-                            }, 2000);
+                            if (this.toast) {
+                                this.toast.warning('You need at least one Stonecutter to remove rocks or boulders!');
+                            }
                             return;
                         }
                     }
@@ -353,11 +350,9 @@ export class MouseHandler {
                     
                     if (budget < demolitionCost) {
                         // Show feedback that player can't afford demolition
-                        const originalText = this.cursorInfo.textContent;
-                        this.cursorInfo.textContent = `Insufficient funds! Demolition costs ⍱${demolitionCost}, have ⍱${budget}`;
-                        setTimeout(() => {
-                            this.cursorInfo.textContent = originalText;
-                        }, 2000);
+                        if (this.toast) {
+                            this.toast.warning(`Insufficient funds! Demolition costs ⍱${demolitionCost}, have ⍱${budget}`);
+                        }
                         return;
                     }
                 }
@@ -373,18 +368,15 @@ export class MouseHandler {
                     // Show feedback that player can't afford the item
                     const cost = this.gameState.getItemCost(selectedTool.type, selectedTool.id);
                     const budget = this.gameState.getBudget();
-                    const originalText = this.cursorInfo.textContent;
-                    this.cursorInfo.textContent = `Insufficient funds! Need ⍱${cost}, have ⍱${budget}`;
-                    setTimeout(() => {
-                        this.cursorInfo.textContent = originalText;
-                    }, 2000);
+                    if (this.toast) {
+                        this.toast.warning(`Insufficient funds! Need ⍱${cost}, have ⍱${budget}`);
+                    }
                     return;
                 }
                 
                 // Check if item has requirements that must be met
                 const requirementsCheck = this.gameState.checkRequirements(selectedTool.type, selectedTool.id);
                 if (!requirementsCheck.met) {
-                    const originalText = this.cursorInfo.textContent;
                     let errorMessage = 'Requirements not met! ';
                     const missing = requirementsCheck.missing;
                     
@@ -402,10 +394,9 @@ export class MouseHandler {
                         errorMessage += 'One or more requirements not met.';
                     }
                     
-                    this.cursorInfo.textContent = errorMessage;
-                    setTimeout(() => {
-                        this.cursorInfo.textContent = originalText;
-                    }, 2000);
+                    if (this.toast) {
+                        this.toast.warning(errorMessage);
+                    }
                     return;
                 }
                 
@@ -417,11 +408,9 @@ export class MouseHandler {
                     this.renderer.render();
                 } else if (!this.gameState.isValidPosition(iso.x, iso.y, selectedTool.type, selectedTool.id)) {
                     // Position is invalid (occupied or out of bounds)
-                    const originalText = this.cursorInfo.textContent;
-                    this.cursorInfo.textContent = 'Invalid position!';
-                    setTimeout(() => {
-                        this.cursorInfo.textContent = originalText;
-                    }, 1500);
+                    if (this.toast) {
+                        this.toast.warning('Invalid position!');
+                    }
                 }
             }
         });

@@ -8,6 +8,7 @@ import { KeyboardHandler } from './input/KeyboardHandler.js';
 import { ToolSelector } from './ui/ToolSelector.js';
 import { ClearButton } from './ui/ClearButton.js';
 import { StatsPanel } from './ui/StatsPanel.js';
+import { Toast } from './ui/Toast.js';
 import { SpriteManager } from './utils/SpriteManager.js';
 import { BUILDING_DATA, DECORATION_DATA, ROAD_DATA } from './data/itemData.js';
 import { CONFIG } from './config.js';
@@ -40,13 +41,17 @@ class Game {
         // Set villager manager in renderer
         this.renderer.setVillagerManager(this.villagerManager);
         
-        // Initialize input handlers
+        // Initialize UI components
         const cursorInfo = document.getElementById('cursor-info');
+        this.toast = new Toast();
+        
+        // Initialize input handlers
         this.mouseHandler = new MouseHandler(
             this.canvasManager.getCanvas(),
             this.renderer,
             this.gameState,
-            cursorInfo
+            cursorInfo,
+            this.toast
         );
         // Set mouse handler in renderer so it can access global mouse position
         this.renderer.setMouseHandler(this.mouseHandler);
