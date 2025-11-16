@@ -336,6 +336,18 @@ export class MouseHandler {
                         }
                     }
                     
+                    // Check if trying to destroy rocks or boulder - requires Stonecutter
+                    if (item.type === 'decoration' && (item.id === 'rocks' || item.id === 'boulder')) {
+                        if (!this.gameState.hasStonecutter()) {
+                            const originalText = this.cursorInfo.textContent;
+                            this.cursorInfo.textContent = 'You need at least one Stonecutter to remove rocks or boulders!';
+                            setTimeout(() => {
+                                this.cursorInfo.textContent = originalText;
+                            }, 2000);
+                            return;
+                        }
+                    }
+                    
                     const demolitionCost = this.gameState.getDemolitionCost(item.type, item.id);
                     const budget = this.gameState.getBudget();
                     

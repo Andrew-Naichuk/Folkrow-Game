@@ -363,6 +363,13 @@ export class GameState {
             }
         }
         
+        // Check if trying to destroy rocks or boulder - requires Stonecutter
+        if (item.type === 'decoration' && (item.id === 'rocks' || item.id === 'boulder')) {
+            if (!this.hasStonecutter()) {
+                return false;
+            }
+        }
+        
         // Get demolition cost from item data
         const demolitionCost = this.getDemolitionCost(item.type, item.id);
         
@@ -696,6 +703,16 @@ export class GameState {
     hasWoodcutterOrTimberman() {
         return this.placedItems.some(item => 
             item.type === 'building' && (item.id === 'woodcutter' || item.id === 'timberman')
+        );
+    }
+
+    /**
+     * Check if player has at least one Stonecutter building
+     * @returns {boolean} True if player has at least one Stonecutter
+     */
+    hasStonecutter() {
+        return this.placedItems.some(item => 
+            item.type === 'building' && item.id === 'stonecutter'
         );
     }
 

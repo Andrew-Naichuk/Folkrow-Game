@@ -1,7 +1,4 @@
 // Building data definitions
-// To use a sprite, add a 'sprite' property with the path to your PNG or WebP file
-// Example: sprite: 'sprites/house1.png'
-//
 // Properties:
 //   - name: Display name shown in the UI
 //   - height: Building height in pixels (affects sprite scaling)
@@ -15,6 +12,7 @@
 //   - expenseAmount: Optional maintenance cost per interval (for buildings that require maintenance)
 //   - allowAdjacentPlacement: If true, allows placing items of the same type/id next to each other (default: false)
 //   - requires: Optional requirements object (e.g., { population: 10, unemployedPopulation: 3 })
+
 export const BUILDING_DATA = {
     house1: { 
         name: 'Basic house',
@@ -58,6 +56,7 @@ export const BUILDING_DATA = {
             population: 20,
             unemployedPopulation: 3,
         }
+        // allows to remove trees, pine, stump, and roots from the map
     },
     blacksmith: { 
         name: 'Blacksmith',
@@ -119,7 +118,23 @@ export const BUILDING_DATA = {
         expenseAmount: 0.5,
         requires: {
             unemployedPopulation: 1
-        }
+        },
+        // allows to remove trees, pine, stump, and roots from the map
+    },
+    stonecutter: { 
+        name: 'Stonecutter',
+        description: 'Removing stones and boulders',
+        height: 20, 
+        width: 1,
+        cost: 200,
+        demolitionCostMultiplier: 0.5,
+        sprite: 'sprites/stonecutter.png',
+        offsetY: -2,
+        expenseAmount: 0.5,
+        requires: {
+            unemployedPopulation: 1
+        },
+        // allows to remove stones and boulders from the map
     },
     campfire: { 
         name: 'Campfire',
@@ -147,17 +162,8 @@ export const BUILDING_DATA = {
     }
 };
 
-// Decoration data definitions
-// To use a sprite, add a 'sprite' property with the path to your PNG or WebP file
-//
-// Properties:
-//   - name: Display name shown in the UI
-//   - cost: Purchase cost
-//   - demolitionCostMultiplier: Multiplier for demolition cost (default: 0.5 = half price)
-//   - sprite: Optional path to sprite file (PNG or WebP)
-//   - offsetY: Vertical offset for sprite positioning (default: 0)
-//   - allowAdjacentPlacement: If true, allows placing items of the same type/id next to each other (default: false)
-//   - resource: Optional resource type that this decoration provides when harvested (e.g., "wood")
+
+
 export const DECORATION_DATA = {
     tree: { 
         name: 'Tree',
@@ -167,6 +173,7 @@ export const DECORATION_DATA = {
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
         sprite: 'sprites/tree.png',
+        // requires a woodcutter or timberman to remove
     },
     pine: { 
         name: 'Pine Tree',
@@ -176,6 +183,7 @@ export const DECORATION_DATA = {
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
         sprite: 'sprites/pine.png',
+        // requires a woodcutter or timberman to remove
     },
     stump: { 
         name: 'Stump',
@@ -185,6 +193,7 @@ export const DECORATION_DATA = {
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: false,
         sprite: 'sprites/stump.png',
+        // requires a woodcutter or timberman to remove
     },
     roots: { 
         name: 'Roots',
@@ -194,6 +203,7 @@ export const DECORATION_DATA = {
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: false,
         sprite: 'sprites/roots.png',
+        // requires a woodcutter or timberman to remove
     },
     rocks: { 
         name: 'Rocks',
@@ -242,17 +252,8 @@ export const DECORATION_DATA = {
     }
 };
 
-// Road data definitions
-// To use a sprite, add a 'sprite' property with the path to your PNG or WebP file
-//
-// Properties:
-//   - name: Display name shown in the UI
-//   - height: Road height in pixels (affects sprite scaling)
-//   - cost: Purchase cost
-//   - demolitionCostMultiplier: Multiplier for demolition cost (default: 0.5 = half price)
-//   - sprite: Optional path to sprite file (PNG or WebP)
-//   - offsetY: Vertical offset for sprite positioning (default: 10 for roads)
-//   - allowAdjacentPlacement: If true, allows placing items of the same type/id next to each other (default: false)
+
+
 export const ROAD_DATA = {
     dirt: { 
         name: 'Dirt',
