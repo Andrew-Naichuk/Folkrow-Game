@@ -1,5 +1,5 @@
 import { CONFIG } from '../config.js';
-import { isoToScreen } from '../utils/coordinateUtils.js';
+import { tileToWorld, worldToScreen } from '../utils/coordinateUtils.js';
 import { adjustBrightness } from '../utils/colorUtils.js';
 import { BUILDING_DATA, DECORATION_DATA, ROAD_DATA } from '../data/itemData.js';
 
@@ -36,8 +36,9 @@ export class ItemRenderer {
         }
 
         const zoom = this.camera.getZoom();
-        const screen = isoToScreen(
-            isoX, isoY,
+        const world = tileToWorld(isoX, isoY);
+        const screen = worldToScreen(
+            world.x, world.y,
             this.canvasWidth, this.canvasHeight,
             this.camera.getX(), this.camera.getY(),
             zoom
@@ -98,8 +99,9 @@ export class ItemRenderer {
      */
     drawIsometricTile(isoX, isoY, color, height = 0) {
         const zoom = this.camera.getZoom();
-        const screen = isoToScreen(
-            isoX, isoY, 
+        const world = tileToWorld(isoX, isoY);
+        const screen = worldToScreen(
+            world.x, world.y, 
             this.canvasWidth, this.canvasHeight,
             this.camera.getX(), this.camera.getY(),
             zoom
@@ -150,8 +152,9 @@ export class ItemRenderer {
         }
         
         const zoom = this.camera.getZoom();
-        const screen = isoToScreen(
-            isoX, isoY,
+        const world = tileToWorld(isoX, isoY);
+        const screen = worldToScreen(
+            world.x, world.y,
             this.canvasWidth, this.canvasHeight,
             this.camera.getX(), this.camera.getY(),
             zoom
@@ -188,8 +191,9 @@ export class ItemRenderer {
         }
         
         const zoom = this.camera.getZoom();
-        const screen = isoToScreen(
-            isoX, isoY,
+        const world = tileToWorld(isoX, isoY);
+        const screen = worldToScreen(
+            world.x, world.y,
             this.canvasWidth, this.canvasHeight,
             this.camera.getX(), this.camera.getY(),
             zoom
@@ -282,8 +286,9 @@ export class ItemRenderer {
         this.ctx.globalAlpha = 1;
         
         const zoom = this.camera.getZoom();
-        const screen = isoToScreen(
-            isoX, isoY,
+        const world = tileToWorld(isoX, isoY);
+        const screen = worldToScreen(
+            world.x, world.y,
             this.canvasWidth, this.canvasHeight,
             this.camera.getX(), this.camera.getY(),
             zoom

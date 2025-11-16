@@ -1,4 +1,4 @@
-import { isoToScreen } from '../utils/coordinateUtils.js';
+import { tileToWorld, worldToScreen } from '../utils/coordinateUtils.js';
 
 /**
  * Manages dust cloud particle animations
@@ -88,8 +88,9 @@ export class DustCloudAnimation {
     draw(ctx, canvasWidth, canvasHeight, cameraX, cameraY, zoom = 1.0) {
         if (this.isComplete) return;
         
-        const screen = isoToScreen(
-            this.isoX, this.isoY,
+        const world = tileToWorld(this.isoX, this.isoY);
+        const screen = worldToScreen(
+            world.x, world.y,
             canvasWidth, canvasHeight,
             cameraX, cameraY,
             zoom

@@ -110,19 +110,11 @@ Hover over any building in the sidebar to see its requirements, costs, and stats
 - **CSS3** for UI styling
 - **LocalStorage** for game state persistence
 
-## 🐛 Known Issues
-
-- Selected tool alignment with actual cursor (might be hard to place items precisely - panning required)
-
 ## 📝 License
 
 <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://folkrow.net">Folkrow</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://naich.uk">Andrii Naichuk</a> is licensed under <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-NC-SA 4.0</a></p>
 
 This work is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
-
-## 👤 Author
-
-**Andrii Naichuk**
 
 - Website: [naich.uk](https://naich.uk)
 - Game: [folkrow.net](https://folkrow.net)

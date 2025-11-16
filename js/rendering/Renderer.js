@@ -1,5 +1,5 @@
 import { CONFIG } from '../config.js';
-import { screenToIso, isoToScreen } from '../utils/coordinateUtils.js';
+import { screenToTile, tileToWorld, worldToScreen } from '../utils/coordinateUtils.js';
 import { GridRenderer } from './GridRenderer.js';
 import { ItemRenderer } from './ItemRenderer.js';
 import { AnimationManager } from './AnimationManager.js';
@@ -229,7 +229,7 @@ export class Renderer {
                 previewY = canvasY;
             }
             
-            const mouseIso = screenToIso(
+            const mouseIso = screenToTile(
                 previewX, previewY,
                 width, height,
                 this.camera.getX(), this.camera.getY(),
@@ -257,8 +257,9 @@ export class Renderer {
             this.ctx.globalAlpha = 1.0;
             
             // Draw validity indicator
-            const screen = isoToScreen(
-                mouseIso.x, mouseIso.y,
+            const world = tileToWorld(mouseIso.x, mouseIso.y);
+            const screen = worldToScreen(
+                world.x, world.y,
                 width, height,
                 this.camera.getX(), this.camera.getY(),
                 zoom

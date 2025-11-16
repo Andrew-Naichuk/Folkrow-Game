@@ -1,5 +1,5 @@
 import { CONFIG } from '../config.js';
-import { isoToScreen } from '../utils/coordinateUtils.js';
+import { tileToWorld, worldToScreen } from '../utils/coordinateUtils.js';
 
 /**
  * Renders villagers on the canvas
@@ -18,8 +18,9 @@ export class VillagerRenderer {
      */
     drawVillager(villager) {
         const zoom = this.camera.getZoom();
-        const screen = isoToScreen(
-            villager.isoX, villager.isoY,
+        const world = tileToWorld(villager.isoX, villager.isoY);
+        const screen = worldToScreen(
+            world.x, world.y,
             this.canvasWidth, this.canvasHeight,
             this.camera.getX(), this.camera.getY(),
             zoom

@@ -1,38 +1,72 @@
 import { CONFIG } from '../config.js';
 
 /**
- * Convert screen coordinates to isometric coordinates
- * @param {number} screenX - Screen X coordinate
- * @param {number} screenY - Screen Y coordinate
- * @param {number} canvasWidth - Canvas width
- * @param {number} canvasHeight - Canvas height
- * @param {number} cameraX - Camera X offset
- * @param {number} cameraY - Camera Y offset
- * @param {number} zoom - Camera zoom level (default: 1.0)
- * @returns {{x: number, y: number}} Isometric coordinates
+ * Convert tile (grid) coordinates to world (iso) coordinates
+ * @param {number} tx - Tile X coordinate
+ * @param {number} ty - Tile Y coordinate
+ * @returns {{x: number, y: number}} World coordinates in iso space
  */
-export function screenToIso(screenX, screenY, canvasWidth, canvasHeight, cameraX, cameraY, zoom = 1.0) {
-    const x = (screenX - canvasWidth / 2 - cameraX) / zoom;
-    const y = (screenY - canvasHeight / 2 - cameraY) / zoom;
-    const isoX = (x / CONFIG.TILE_WIDTH + y / CONFIG.TILE_HEIGHT) / 2;
-    const isoY = (y / CONFIG.TILE_HEIGHT - x / CONFIG.TILE_WIDTH) / 2;
-    return { x: Math.floor(isoX), y: Math.floor(isoY) };
+export function tileToWorld(tx, ty) {
+    const x = (tx - ty) * (CONFIG.TILE_WIDTH / 2);
+    const y = (tx + ty) * (CONFIG.TILE_HEIGHT / 2);
+    return { x, y };
 }
 
 /**
- * Convert isometric coordinates to screen coordinates
- * @param {number} isoX - Isometric X coordinate
- * @param {number} isoY - Isometric Y coordinate
+ * Convert world (iso) coordinates to screen coordinates
+ * @param {number} wx - World X coordinate
+ * @param {number} wy - World Y coordinate
  * @param {number} canvasWidth - Canvas width
  * @param {number} canvasHeight - Canvas height
- * @param {number} cameraX - Camera X offset
- * @param {number} cameraY - Camera Y offset
- * @param {number} zoom - Camera zoom level (default: 1.0)
+ * @param {number} cameraX - Camera X position in world space
+ * @param {number} cameraY - Camera Y position in world space
+ * @param {number} zoom - Camera zoom level
  * @returns {{x: number, y: number}} Screen coordinates
  */
-export function isoToScreen(isoX, isoY, canvasWidth, canvasHeight, cameraX, cameraY, zoom = 1.0) {
-    const screenX = ((isoX - isoY) * CONFIG.TILE_WIDTH / 2) * zoom + canvasWidth / 2 + cameraX;
-    const screenY = ((isoX + isoY) * CONFIG.TILE_HEIGHT / 2) * zoom + canvasHeight / 2 + cameraY;
-    return { x: screenX, y: screenY };
+export function worldToScreen(wx, wy, canvasWidth, canvasHeight, cameraX, cameraY, zoom) {
+    const sx = (wx - cameraX) * zoom + canvasWidth / 2;
+    const sy = (wy - cameraY) * zoom + canvasHeight / 2;
+    return { x: sx, y: sy };
+}
+
+/**
+ * Convert screen coordinates to world (iso) coordinates
+ * @param {number} sx - Screen X coordinate
+ * @param {number} sy - Screen Y coordinate
+ * @param {number} canvasWidth - Canvas width
+ * @param {number} canvasHeight - Canvas height
+ * @param {number} cameraX - Camera X position in world space
+ * @param {number} cameraY - Camera Y position in world space
+ * @param {number} zoom - Camera zoom level
+ * @returns {{x: number, y: number}} World coordinates in iso space
+ */
+export function screenToWorld(sx, sy, canvasWidth, canvasHeight, cameraX, cameraY, zoom) {
+    const wx = (sx - canvasWidth / 2) / zoom + cameraX;
+    const wy = (sy - canvasHeight / 2) / zoom + cameraY;
+    return { x: wx, y: wy };
+}
+
+/**
+ * Convert screen coordinates to tile (grid) coordinates
+ * @param {number} sx - Screen X coordinate
+ * @param {number} sy - Screen Y coordinate
+ * @param {number} canvasWidth - Canvas width
+ * @param {number} canvasHeight - Canvas height
+ * @param {number} cameraX - Camera X position in world space
+ * @param {number} cameraY - Camera Y position in world space
+ * @param {number} zoom - Camera zoom level
+ * @returns {{x: number, y: number}} Tile coordinates
+ */
+export function screenToTile(sx, sy, canvasWidth, canvasHeight, cameraX, cameraY, zoom) {
+    const world = screenToWorld(sx, sy, canvasWidth, canvasHeight, cameraX, cameraY, zoom);
+    const wx = world.x;
+    const wy = world.y;
+
+    const tw = CONFIG.TILE_WIDTH / 2;
+    const th = CONFIG.TILE_HEIGHT / 2;
+
+    const tx = Math.floor((wy / th + wx / tw) / 2);
+    const ty = Math.floor((wy / th - wx / tw) / 2);
+    return { x: tx, y: ty };
 }
 

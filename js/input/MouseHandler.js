@@ -1,4 +1,4 @@
-import { screenToIso, isoToScreen } from '../utils/coordinateUtils.js';
+import { screenToTile, tileToWorld, worldToScreen, screenToWorld } from '../utils/coordinateUtils.js';
 import { CONFIG } from '../config.js';
 import { BUILDING_DATA } from '../data/itemData.js';
 
@@ -19,8 +19,7 @@ export class MouseHandler {
         
         // Middle mouse button drag state
         this.isDragging = false;
-        this.lastDragX = 0;
-        this.lastDragY = 0;
+        this.dragStart = null;
         
         // Create custom cursor element
         this.customCursor = this.createCustomCursor();
@@ -139,8 +138,8 @@ export class MouseHandler {
         const camera = this.renderer.camera;
         const zoom = camera.getZoom();
         
-        // Convert mouse position to isometric coordinates
-        const mouseIso = screenToIso(
+        // Convert mouse position to tile coordinates
+        const mouseIso = screenToTile(
             canvasX, canvasY,
             canvasWidth, canvasHeight,
             camera.getX(), camera.getY(),
@@ -148,8 +147,9 @@ export class MouseHandler {
         );
         
         // Get screen position of the preview tile
-        const screen = isoToScreen(
-            mouseIso.x, mouseIso.y,
+        const world = tileToWorld(mouseIso.x, mouseIso.y);
+        const screen = worldToScreen(
+            world.x, world.y,
             canvasWidth, canvasHeight,
             camera.getX(), camera.getY(),
             zoom
@@ -172,20 +172,37 @@ export class MouseHandler {
             if (e.button === 1) { // Middle mouse button
                 e.preventDefault(); // Prevent default scrolling behavior
                 this.isDragging = true;
-                this.lastDragX = e.clientX;
-                this.lastDragY = e.clientY;
+                const rect = this.canvas.getBoundingClientRect();
+                const canvasWidth = this.canvas.width;
+                const canvasHeight = this.canvas.height;
+                const camera = this.renderer.camera;
+                const zoom = camera.getZoom();
+                
+                // Store drag start state (screen position and camera position)
+                this.dragStart = {
+                    screenX: e.clientX,
+                    screenY: e.clientY,
+                    camX: camera.getX(),
+                    camY: camera.getY()
+                };
                 this.canvas.style.cursor = 'grabbing';
             }
         });
 
         // Middle mouse button up - stop dragging
-        this.canvas.addEventListener('mouseup', (e) => {
+        window.addEventListener('mouseup', (e) => {
             if (e.button === 1) { // Middle mouse button
-                e.preventDefault();
                 this.isDragging = false;
+                this.dragStart = null;
                 // Update cursor based on tool selection state
                 this.updateCursor();
             }
+        });
+        
+        // In case cursor leaves the window while dragging
+        window.addEventListener('mouseleave', () => {
+            this.isDragging = false;
+            this.dragStart = null;
         });
 
         // Mouse move - handle dragging and cursor updates
@@ -201,19 +218,15 @@ export class MouseHandler {
             const camera = this.renderer.camera;
             
             // Handle middle mouse button dragging
-            if (this.isDragging) {
-                const deltaX = e.clientX - this.lastDragX;
-                const deltaY = e.clientY - this.lastDragY;
-                
-                // Move camera in the same direction as mouse movement (inverted dragging)
-                camera.move(deltaX, deltaY);
+            if (this.isDragging && this.dragStart) {
+                const dx = (e.clientX - this.dragStart.screenX) / camera.getZoom();
+                const dy = (e.clientY - this.dragStart.screenY) / camera.getZoom();
+                camera.x = this.dragStart.camX - dx;
+                camera.y = this.dragStart.camY - dy;
                 
                 // Ensure cursor is set to grabbing while dragging
                 this.canvas.style.cursor = 'grabbing';
                 this.customCursor.style.display = 'none';
-                
-                this.lastDragX = e.clientX;
-                this.lastDragY = e.clientY;
             } else {
                 // Hide cursor when tool is selected, otherwise show grab cursor
                 if (this.gameState.getSelectedTool()) {
@@ -227,7 +240,7 @@ export class MouseHandler {
             }
             
             const zoom = camera.getZoom();
-            const iso = screenToIso(
+            const iso = screenToTile(
                 this.mouseX, this.mouseY,
                 canvasWidth, canvasHeight,
                 camera.getX(), camera.getY(),
@@ -243,6 +256,7 @@ export class MouseHandler {
         this.canvas.addEventListener('mouseleave', (e) => {
             if (this.isDragging) {
                 this.isDragging = false;
+                this.dragStart = null;
                 this.canvas.style.cursor = 'default';
             } else {
                 this.canvas.style.cursor = 'default';
@@ -276,7 +290,7 @@ export class MouseHandler {
             e.preventDefault(); // Prevent context menu
         });
 
-        // Handle mouse wheel for zooming
+        // Handle mouse wheel for zooming (zoom around cursor)
         this.canvas.addEventListener('wheel', (e) => {
             e.preventDefault(); // Prevent page scrolling
             
@@ -286,12 +300,8 @@ export class MouseHandler {
             const canvasWidth = this.canvas.width;
             const canvasHeight = this.canvas.height;
             
-            // Calculate zoom delta (negative deltaY = zoom in, positive = zoom out)
-            // Use exponential scaling for smoother zoom
-            const zoomDelta = -e.deltaY * 0.001;
-            
             // Zoom towards mouse position
-            this.renderer.camera.zoomAtPoint(zoomDelta, mouseX, mouseY, canvasWidth, canvasHeight);
+            this.renderer.camera.zoomAtPoint(e.deltaY, mouseX, mouseY, canvasWidth, canvasHeight);
             
             // Update mouse position and render
             this.mouseX = mouseX;
@@ -309,7 +319,7 @@ export class MouseHandler {
             const camera = this.renderer.camera;
             
             const zoom = camera.getZoom();
-            const iso = screenToIso(
+            const iso = screenToTile(
                 this.mouseX, this.mouseY,
                 canvasWidth, canvasHeight,
                 camera.getX(), camera.getY(),

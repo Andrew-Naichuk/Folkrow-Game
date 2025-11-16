@@ -1,5 +1,5 @@
 import { CONFIG } from '../config.js';
-import { isoToScreen } from '../utils/coordinateUtils.js';
+import { tileToWorld, worldToScreen } from '../utils/coordinateUtils.js';
 import { ItemRenderer } from './ItemRenderer.js';
 
 /**
@@ -24,8 +24,9 @@ export class GridRenderer {
         const zoom = this.camera.getZoom();
         for (let x = -CONFIG.GRID_SIZE; x <= CONFIG.GRID_SIZE; x++) {
             for (let y = -CONFIG.GRID_SIZE; y <= CONFIG.GRID_SIZE; y++) {
-                const screen = isoToScreen(
-                    x, y,
+                const world = tileToWorld(x, y);
+                const screen = worldToScreen(
+                    world.x, world.y,
                     this.canvasWidth, this.canvasHeight,
                     this.camera.getX(), this.camera.getY(),
                     zoom

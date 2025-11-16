@@ -12,6 +12,7 @@ import { Toast } from './ui/Toast.js';
 import { SpriteManager } from './utils/SpriteManager.js';
 import { BUILDING_DATA, DECORATION_DATA, ROAD_DATA } from './data/itemData.js';
 import { CONFIG } from './config.js';
+import { tileToWorld } from './utils/coordinateUtils.js';
 
 /**
  * Main application entry point
@@ -23,6 +24,9 @@ class Game {
         this.canvasManager = new CanvasManager('gameCanvas', this.camera);
         this.gameState = new GameState();
         this.villagerManager = new VillagerManager(this.gameState);
+        
+        // Center camera on middle of the map
+        this.initCamera();
         
         // Initialize sprite manager
         this.spriteManager = new SpriteManager();
@@ -77,6 +81,17 @@ class Game {
         
         // Start game loop
         this.gameLoop();
+    }
+
+    /**
+     * Initialize camera position to center on the map
+     */
+    initCamera() {
+        const midTileX = (CONFIG.GRID_SIZE - 1) / 2;
+        const midTileY = (CONFIG.GRID_SIZE - 1) / 2;
+        const centerWorld = tileToWorld(midTileX, midTileY);
+        this.camera.x = centerWorld.x;
+        this.camera.y = centerWorld.y;
     }
 
     /**
@@ -222,8 +237,8 @@ class Game {
         // Process income generation and expenses (frame-rate independent)
         this.processIncomeGeneration(deltaTime);
         
-        // Update camera based on keyboard input
-        this.camera.update(this.keyboardHandler.getKeys());
+        // Update camera based on keyboard input (deltaTime in seconds)
+        this.camera.update(this.keyboardHandler.getKeys(), deltaTime / 1000);
         
         // Update villagers
         this.villagerManager.update(deltaTime);

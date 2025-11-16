@@ -1,4 +1,4 @@
-import { isoToScreen } from '../utils/coordinateUtils.js';
+import { tileToWorld, worldToScreen } from '../utils/coordinateUtils.js';
 
 /**
  * Manages smoke particle animations for buildings like campfire and blacksmith
@@ -136,8 +136,9 @@ export class SmokeAnimation {
     draw(ctx, canvasWidth, canvasHeight, cameraX, cameraY, zoom = 1.0) {
         if (!this.isActive || this.particles.length === 0) return;
         
-        const screen = isoToScreen(
-            this.isoX, this.isoY,
+        const world = tileToWorld(this.isoX, this.isoY);
+        const screen = worldToScreen(
+            world.x, world.y,
             canvasWidth, canvasHeight,
             cameraX, cameraY,
             zoom
