@@ -55,6 +55,7 @@ export const BUILDING_DATA = {
         sprite: 'sprites/timberman.png',
         offsetY: 0,
         requires: {
+            population: 20,
             unemployedPopulation: 3,
         }
     },
@@ -70,6 +71,7 @@ export const BUILDING_DATA = {
         incomeAmount: 26,
         expenseAmount: 9,
         requires: {
+            population: 40,
             unemployedPopulation: 4
         }
     },
@@ -159,29 +161,25 @@ export const BUILDING_DATA = {
 export const DECORATION_DATA = {
     tree: { 
         name: 'Tree',
-        description: 'A tall, majestic tree that provides shade and wood',
+        description: 'A tall, majestic tree that provides shade and wood. Can fall on itself but requires a woodcutter or timberman to remove',
         cost: 20,
         offsetY: -8,
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
         sprite: 'sprites/tree.png',
-        hoverMessage: 'Can fall on itself, requires a woodcutter or timberman to remove',
-        resource: "wood"
     },
     pine: { 
         name: 'Pine Tree',
-        description: 'Smells like distant mountains and quiet snow',
+        description: 'Smells like distant mountains and quiet snow. Can fall on itself but requires a woodcutter or timberman to remove',
         cost: 45,
         offsetY: -8,
         demolitionCostMultiplier: 0.5,
         allowAdjacentPlacement: true,
         sprite: 'sprites/pine.png',
-        hoverMessage: 'Can fall on itself, requires a woodcutter or timberman to remove',
-        resource: "wood"
     },
     stump: { 
         name: 'Stump',
-        description: 'A sad, dead tree that only creates problems',
+        description: 'A sad, dead tree that only creates problems. Requires a woodcutter or timberman to remove',
         cost: 5,
         offsetY: 5,
         demolitionCostMultiplier: 0.5,
@@ -190,7 +188,7 @@ export const DECORATION_DATA = {
     },
     roots: { 
         name: 'Roots',
-        description: 'A bunch of roots that look like they couldn\'t be any more annoying',
+        description: 'A bunch of roots that look like they couldn\'t be any more annoying. Requires a woodcutter or timberman to remove',
         cost: 5,
         offsetY: 9,
         demolitionCostMultiplier: 0.5,
