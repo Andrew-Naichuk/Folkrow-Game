@@ -19,6 +19,10 @@ export class GameState {
         this.workersRequired = 0; // Total workers required by all placed items
         this.productionMultiplier = 1; // Production multiplier (1 = full production, <1 = reduced)
         
+        // Day/night cycle tracking
+        this.currentTick = 0; // Current tick in the cycle (0 to DAY_LENGTH + NIGHT_LENGTH - 1)
+        this.isDay = true; // Whether it's currently day or night
+        
         // Load saved state from localStorage
         const hasSavedState = this.loadFromLocalStorage();
         
@@ -354,6 +358,10 @@ export class GameState {
         this.unemployedPopulation = 0;
         this.workersRequired = 0;
         this.productionMultiplier = 1;
+        
+        // Reset time cycle
+        this.currentTick = 0;
+        this.isDay = true;
         
         // Clear selected tool
         this.clearSelectedTool();
@@ -837,6 +845,42 @@ export class GameState {
     }
 
     /**
+     * Advance the day/night cycle by one tick
+     * Called when income generation interval occurs
+     */
+    advanceTimeCycle() {
+        this.currentTick++;
+        const cycleLength = CONFIG.DAY_LENGTH + CONFIG.NIGHT_LENGTH;
+        
+        // Reset tick when cycle completes
+        if (this.currentTick >= cycleLength) {
+            this.currentTick = 0;
+        }
+        
+        // Determine if it's day or night
+        this.isDay = this.currentTick < CONFIG.DAY_LENGTH;
+    }
+
+    /**
+     * Get current time cycle information
+     * @returns {{isDay: boolean, progress: number, tick: number}} Time cycle info
+     */
+    getTimeCycleInfo() {
+        const cycleLength = CONFIG.DAY_LENGTH + CONFIG.NIGHT_LENGTH;
+        const currentPhaseLength = this.isDay ? CONFIG.DAY_LENGTH : CONFIG.NIGHT_LENGTH;
+        const phaseTick = this.isDay ? this.currentTick : (this.currentTick - CONFIG.DAY_LENGTH);
+        const progress = phaseTick / currentPhaseLength; // 0 to 1
+        
+        return {
+            isDay: this.isDay,
+            progress: progress,
+            tick: this.currentTick,
+            phaseTick: phaseTick,
+            phaseLength: currentPhaseLength
+        };
+    }
+
+    /**
      * Check if player has at least one Woodcutter or Timberman building
      * @returns {boolean} True if player has at least one Woodcutter or Timberman
      */
@@ -885,7 +929,8 @@ export class GameState {
                 placedItems: this.placedItems,
                 budget: this.budget,
                 population: this.population,
-                unemployedPopulation: this.unemployedPopulation
+                unemployedPopulation: this.unemployedPopulation,
+                currentTick: this.currentTick
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         } catch (error) {
@@ -952,6 +997,12 @@ export class GameState {
                 
                 // Safety check: ensure unemployed never exceeds total population
                 this.unemployedPopulation = Math.min(this.population, this.unemployedPopulation);
+                
+                // Restore time cycle state if saved
+                if (typeof state.currentTick === 'number' && state.currentTick >= 0) {
+                    this.currentTick = state.currentTick % (CONFIG.DAY_LENGTH + CONFIG.NIGHT_LENGTH);
+                    this.isDay = this.currentTick < CONFIG.DAY_LENGTH;
+                }
                 
                 return true; // Saved state was found and loaded
             }

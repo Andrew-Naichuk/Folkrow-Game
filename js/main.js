@@ -47,7 +47,6 @@ class Game {
         this.renderer.setVillagerManager(this.villagerManager);
         
         // Initialize UI components
-        const cursorInfo = document.getElementById('cursor-info');
         this.toast = new Toast();
         this.tooltip = new Tooltip();
         
@@ -56,7 +55,6 @@ class Game {
             this.canvasManager.getCanvas(),
             this.renderer,
             this.gameState,
-            cursorInfo,
             this.toast,
             this.tooltip
         );
@@ -161,13 +159,20 @@ class Game {
         
         // Process when interval is reached
         if (this.incomeAccumulatedTime >= this.incomeInterval) {
+            // Advance the day/night cycle
+            this.gameState.advanceTimeCycle();
+            
             const placedItems = this.gameState.getPlacedItems();
+            
+            // Get production multiplier to apply to all income/expenses
+            const productionMultiplier = this.gameState.getProductionMultiplier();
+            
+            // Apply night multiplier if it's night
+            const nightMultiplier = this.gameState.isDay ? 1 : CONFIG.NIGHT_PRODUCTION_MULTIPLIER;
+            const finalMultiplier = productionMultiplier * nightMultiplier;
             
             // Process income generation
             if (this.incomeGenerators.size > 0) {
-                // Get production multiplier to apply to all income
-                const productionMultiplier = this.gameState.getProductionMultiplier();
-                
                 this.incomeGenerators.forEach((incomeData, buildingId) => {
                     // Count buildings of this type
                     const buildingCount = placedItems.filter(item => 
@@ -175,8 +180,8 @@ class Game {
                     ).length;
                     
                     if (buildingCount > 0) {
-                        // Apply production multiplier to income
-                        const totalIncome = buildingCount * incomeData.amount * productionMultiplier;
+                        // Apply production multiplier and night multiplier to income
+                        const totalIncome = buildingCount * incomeData.amount * finalMultiplier;
                         this.gameState.addBudget(totalIncome);
                         
                         // Trigger budget display animation

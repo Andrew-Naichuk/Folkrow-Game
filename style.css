@@ -163,6 +163,7 @@ body {
     height: 100vh;
     background: var(--color-canvas-bg);
     overflow: hidden;
+    transition: background-color 0.5s ease;
 }
 
 #gameCanvas {
@@ -359,6 +360,82 @@ body {
     color: #6b4a3d;
     border: var(--border-width-thin) solid #b37a6b;
     box-shadow: inset 0 2px 4px rgba(179, 122, 107, 0.2);
+}
+
+/* ============================================
+   TIME GAUGE
+   ============================================ */
+.time-gauge-container {
+    background: linear-gradient(135deg, rgba(139, 111, 71, 0.15) 0%, rgba(139, 111, 71, 0.1) 100%);
+    padding: 10px;
+    border-radius: var(--border-radius-sm);
+    border: var(--border-width-thin) solid rgba(139, 111, 71, 0.3);
+    box-shadow: inset 0 2px 4px rgba(139, 111, 71, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.time-gauge-label {
+    text-align: center;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    font-family: var(--font-primary);
+    color: var(--color-brown-text);
+}
+
+.time-gauge {
+    position: relative;
+    width: 100%;
+    height: 24px;
+    background: rgba(139, 111, 71, 0.2);
+    border: var(--border-width-thin) solid var(--color-brown-dark);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(139, 111, 71, 0.2);
+}
+
+.time-gauge-day {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: calc(24 / 36 * 100%); /* DAY_LENGTH / (DAY_LENGTH + NIGHT_LENGTH) = 16/22 ≈ 72.73% */
+    background: linear-gradient(90deg, #ffd89b 0%, #fdb44b 50%, #ffa726 100%);
+    transition: width var(--transition-normal);
+}
+
+.time-gauge-night {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: calc(12 / 36 * 100%); /* NIGHT_LENGTH / (DAY_LENGTH + NIGHT_LENGTH) = 6/22 ≈ 27.27% */
+    background: linear-gradient(90deg, #2c3e50 0%, #1a1a2e 50%, #0f0f1e 100%);
+    transition: width var(--transition-normal);
+}
+
+.time-gauge-indicator {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #fff;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.8), 0 0 8px rgba(255, 255, 255, 0.4);
+    border-left: 1px solid rgba(255, 255, 255, 0.5);
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
+    transform: translateX(-50%);
+    transition: left var(--transition-normal);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.time-gauge-status {
+    text-align: center;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    font-family: var(--font-primary);
+    color: var(--color-brown-text);
 }
 
 .budget-display.low-budget {
@@ -588,24 +665,6 @@ body {
 /* ============================================
    INFO PANEL
    ============================================ */
-.info-panel {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    background: var(--gradient-sidebar);
-    padding: var(--spacing-md) 18px;
-    border-radius: var(--border-radius-sm);
-    font-size: var(--font-size-base);
-    border: var(--border-width-thin) solid var(--color-brown-dark);
-    border-style: var(--border-style);
-    box-shadow: 
-        var(--shadow-inset-light),
-        var(--shadow-outset-sm);
-    color: var(--color-brown-text);
-    font-family: var(--font-primary);
-    font-weight: var(--font-weight-medium);
-}
-
 .item-info-panel {
     position: fixed;
     background: var(--gradient-sidebar);

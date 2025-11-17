@@ -6,11 +6,10 @@ import { BUILDING_DATA, DECORATION_DATA, ROAD_DATA } from '../data/itemData.js';
  * Handles mouse input events
  */
 export class MouseHandler {
-    constructor(canvas, renderer, gameState, cursorInfo, toast = null, tooltip = null) {
+    constructor(canvas, renderer, gameState, toast = null, tooltip = null) {
         this.canvas = canvas;
         this.renderer = renderer;
         this.gameState = gameState;
-        this.cursorInfo = cursorInfo;
         this.toast = toast;
         this.tooltip = tooltip;
         this.mouseX = 0;
@@ -250,7 +249,6 @@ export class MouseHandler {
                 camera.getX(), camera.getY(),
                 zoom
             );
-            this.cursorInfo.textContent = `Grid: (${iso.x}, ${iso.y})`;
             
             // Check for hover over items with hoverText
             this.checkHoverForTooltip(iso.x, iso.y, e.clientX, e.clientY);
