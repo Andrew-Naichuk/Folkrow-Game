@@ -81,7 +81,10 @@ export class StatsPanel {
 
         if (this.productionElement) {
             const productionMultiplier = this.gameState.getProductionMultiplier();
-            const productionPercent = (productionMultiplier * 100).toFixed(2);
+            // Apply night multiplier if it's night
+            const nightMultiplier = this.gameState.isDay ? 1 : CONFIG.NIGHT_PRODUCTION_MULTIPLIER;
+            const finalProductionMultiplier = productionMultiplier * nightMultiplier;
+            const productionPercent = (finalProductionMultiplier * 100).toFixed(2);
             this.productionElement.textContent = `Production: ${productionPercent}%`;
         }
 
@@ -121,7 +124,7 @@ export class StatsPanel {
         
         // Update status text
         if (this.timeStatusElement) {
-            this.timeStatusElement.textContent = timeInfo.isDay ? 'Day' : 'Night, production low';
+            this.timeStatusElement.textContent = timeInfo.isDay ? 'Day' : 'Night, village resting';
         }
         
         // The day and night sections are already sized correctly in CSS

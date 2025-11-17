@@ -58,6 +58,31 @@ export class MouseHandler {
                     this.mouseX = canvasX;
                     this.mouseY = canvasY;
                     this.renderer.updateMousePosition(this.mouseX, this.mouseY);
+                    
+                    // Check for demolition tooltip if demolition tool is selected
+                    const selectedTool = this.gameState.getSelectedTool();
+                    const isDemolitionTool = selectedTool && selectedTool.type === 'tool' && selectedTool.id === 'bulldozer';
+                    if (isDemolitionTool && this.tooltip) {
+                        const canvasWidth = this.canvas.width;
+                        const canvasHeight = this.canvas.height;
+                        const camera = this.renderer.camera;
+                        const zoom = camera.getZoom();
+                        const iso = screenToTile(
+                            this.mouseX, this.mouseY,
+                            canvasWidth, canvasHeight,
+                            camera.getX(), camera.getY(),
+                            zoom
+                        );
+                        this.checkHoverForTooltip(iso.x, iso.y, e.clientX, e.clientY);
+                    }
+                } else {
+                    // Mouse is outside canvas, hide tooltip if demolition tool is selected
+                    const selectedTool = this.gameState.getSelectedTool();
+                    const isDemolitionTool = selectedTool && selectedTool.type === 'tool' && selectedTool.id === 'bulldozer';
+                    if (isDemolitionTool && this.tooltip && this.hoveredItem) {
+                        this.tooltip.hide();
+                        this.hoveredItem = null;
+                    }
                 }
                 
                 // Update custom cursor position
@@ -371,7 +396,7 @@ export class MouseHandler {
                     if (budget < demolitionCost) {
                         // Show feedback that player can't afford demolition
                         if (this.toast) {
-                            this.toast.warning(`Insufficient funds! Demolition costs ⍱${demolitionCost}, have ⍱${budget}`);
+                            this.toast.warning(`Insufficient funds! Demolition costs ⍱${demolitionCost}, have ⍱${budget.toFixed(2)}`);
                         }
                         return;
                     }
@@ -389,7 +414,7 @@ export class MouseHandler {
                     const cost = this.gameState.getItemCost(selectedTool.type, selectedTool.id);
                     const budget = this.gameState.getBudget();
                     if (this.toast) {
-                        this.toast.warning(`Insufficient funds! Need ⍱${cost}, have ⍱${budget}`);
+                        this.toast.warning(`Insufficient funds! Need ⍱${cost}, have ⍱${budget.toFixed(2)}`);
                     }
                     return;
                 }
@@ -463,6 +488,11 @@ export class MouseHandler {
                 this.canvas.style.cursor = 'grab';
             }
             this.customCursor.style.display = 'none';
+            // Hide tooltip if it was showing demolition cost
+            if (this.tooltip && this.hoveredItem) {
+                this.tooltip.hide();
+                this.hoveredItem = null;
+            }
             // Re-enable UI interaction
             this.enableUIInteraction();
             // Tooltip will be shown again on next mousemove if hovering over item with hoverText
@@ -482,20 +512,38 @@ export class MouseHandler {
             return;
         }
 
-        // Don't show tooltip while dragging or when tool is selected
-        if (this.isDragging || this.gameState.getSelectedTool()) {
-            if (this.hoveredItem) {
-                this.tooltip.hide();
-                this.hoveredItem = null;
-            }
-            return;
-        }
+        const selectedTool = this.gameState.getSelectedTool();
+        const isDemolitionTool = selectedTool && selectedTool.type === 'tool' && selectedTool.id === 'bulldozer';
 
         // Find item at this position
         const placedItems = this.gameState.getPlacedItems();
         const item = placedItems.find(item => 
             item.isoX === isoX && item.isoY === isoY
         );
+
+        // If demolition tool is selected and hovering over an item, show demolition cost
+        if (isDemolitionTool && item && !this.isDragging) {
+            const demolitionCost = this.gameState.getDemolitionCost(item.type, item.id);
+            const itemKey = `${item.isoX},${item.isoY}`;
+            
+            if (this.hoveredItem !== itemKey) {
+                this.hoveredItem = itemKey;
+                this.tooltip.show(`Demolition: ⍱${demolitionCost.toFixed(2)}`, clientX, clientY);
+            } else {
+                // Update tooltip position in case mouse moved
+                this.tooltip.show(`Demolition: ⍱${demolitionCost.toFixed(2)}`, clientX, clientY);
+            }
+            return;
+        }
+
+        // Don't show tooltip while dragging or when tool is selected (but not demolition)
+        if (this.isDragging || selectedTool) {
+            if (this.hoveredItem) {
+                this.tooltip.hide();
+                this.hoveredItem = null;
+            }
+            return;
+        }
 
         if (item) {
             // Get item data

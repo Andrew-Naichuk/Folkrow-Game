@@ -9,7 +9,7 @@ export class VillagerManager {
         this.gameState = gameState;
         this.pathfinder = new Pathfinder(gameState);
         this.villagers = [];
-        this.spawnInterval = 5000; // Spawn a new villager every 5 seconds
+        this.spawnInterval = 3000; // Spawn a new villager every 5 seconds
         this.lastSpawnTime = Date.now();
     }
 
@@ -35,9 +35,12 @@ export class VillagerManager {
      * Spawn a new villager on a road tile
      */
     spawnVillager() {
-        const maxVillagers = this.gameState.getUnemployedPopulation();
+        // At night, use total population; during day, use unemployed population
+        const maxVillagers = this.gameState.isDay 
+            ? this.gameState.getUnemployedPopulation()
+            : this.gameState.getPopulation();
         
-        // Don't spawn if unemployed population is 0 or we've reached the unemployed population limit
+        // Don't spawn if population is 0 or we've reached the population limit
         if (maxVillagers === 0 || this.villagers.length >= maxVillagers) {
             return;
         }
@@ -49,8 +52,8 @@ export class VillagerManager {
         }
 
         // Random villager properties
-        const colors = ['#8b4513', '#654321', '#a0522d', '#cd853f']; // Brown shades
-        const shirtColors = ['#4169e1', '#228b22', '#8b0000', '#ff6347', '#9370db']; // Various colors
+        const colors = ['#533518', '#C1733C', '#E4AA81', '#E6BEA2']; // skin shades
+        const shirtColors = ['#4169e1', '#228b22', '#8b0000', '#ff6347', '#9370db', 'E7D236']; // Various colors
         
         const villager = {
             id: Date.now() + Math.random(), // Unique ID
@@ -80,16 +83,19 @@ export class VillagerManager {
      * @param {number} deltaTime - Time since last update in milliseconds
      */
     update(deltaTime) {
-        const maxVillagers = this.gameState.getUnemployedPopulation();
+        // At night, use total population; during day, use unemployed population
+        const maxVillagers = this.gameState.isDay 
+            ? this.gameState.getUnemployedPopulation()
+            : this.gameState.getPopulation();
         
-        // Spawn new villagers periodically (only if unemployed population > 0)
+        // Spawn new villagers periodically (only if population > 0)
         const now = Date.now();
         if (maxVillagers > 0 && now - this.lastSpawnTime >= this.spawnInterval && this.villagers.length < maxVillagers) {
             this.spawnVillager();
             this.lastSpawnTime = now;
         }
         
-        // Remove excess villagers if unemployed population decreased
+        // Remove excess villagers if population decreased
         if (this.villagers.length > maxVillagers) {
             const excess = this.villagers.length - maxVillagers;
             this.villagers.splice(0, excess);
