@@ -9,7 +9,7 @@ export class VillagerManager {
         this.gameState = gameState;
         this.pathfinder = new Pathfinder(gameState);
         this.villagers = [];
-        this.spawnInterval = 3000; // Spawn a new villager every 5 seconds
+        this.spawnInterval = 1000; // Spawn a new villager every 5 seconds
         this.lastSpawnTime = Date.now();
     }
 
