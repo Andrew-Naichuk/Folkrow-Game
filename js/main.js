@@ -236,6 +236,24 @@ class Game {
         }, ENVIRONMENT_EVENT_INTERVAL);
     }
 
+    /**
+     * Reset the current game using updated config values
+     */
+    resetForNewConfig() {
+        this.gameState.resetGame();
+        
+        if (this.villagerManager) {
+            this.villagerManager.clear();
+        }
+        
+        this.incomeAccumulatedTime = 0;
+        this.initCamera();
+        
+        if (this.renderer) {
+            this.renderer.render();
+        }
+    }
+
     gameLoop() {
         // Calculate delta time using performance.now() for better precision
         const currentTime = performance.now();
@@ -259,12 +277,105 @@ class Game {
     }
 }
 
+const DEFAULT_SETUP = {
+    gridSize: CONFIG.GRID_SIZE,
+    budget: CONFIG.INITIAL_BUDGET,
+    dayLength: CONFIG.DAY_LENGTH,
+    nightLength: CONFIG.NIGHT_LENGTH
+};
+
+let activeGame = null;
+
+function initializeSetupModal() {
+    const modal = document.getElementById('setup-modal');
+    if (!modal) {
+        activeGame = new Game();
+        return;
+    }
+
+    const mapSizeInput = document.getElementById('setup-map-size');
+    const budgetInput = document.getElementById('setup-budget');
+    const dayLengthInput = document.getElementById('setup-day-length');
+    const nightLengthInput = document.getElementById('setup-night-length');
+    const mapSizeValue = document.getElementById('setup-map-size-value');
+    const budgetValue = document.getElementById('setup-budget-value');
+    const dayLengthValue = document.getElementById('setup-day-length-value');
+    const nightLengthValue = document.getElementById('setup-night-length-value');
+    const startButton = document.getElementById('setup-start-btn');
+    const defaultsButton = document.getElementById('setup-defaults-btn');
+
+    const updateValueDisplay = () => {
+        if (mapSizeValue) mapSizeValue.textContent = `${mapSizeInput.value} x ${mapSizeInput.value}`;
+        if (budgetValue) budgetValue.textContent = `⍱${Number(budgetInput.value).toLocaleString()}`;
+        if (dayLengthValue) dayLengthValue.textContent = `${dayLengthInput.value} ticks`;
+        if (nightLengthValue) nightLengthValue.textContent = `${nightLengthInput.value} ticks`;
+    };
+
+    const setDefaults = () => {
+        mapSizeInput.value = DEFAULT_SETUP.gridSize;
+        budgetInput.value = DEFAULT_SETUP.budget;
+        dayLengthInput.value = DEFAULT_SETUP.dayLength;
+        nightLengthInput.value = DEFAULT_SETUP.nightLength;
+        updateValueDisplay();
+    };
+
+    const setCurrentValues = () => {
+        mapSizeInput.value = CONFIG.GRID_SIZE;
+        budgetInput.value = CONFIG.INITIAL_BUDGET;
+        dayLengthInput.value = CONFIG.DAY_LENGTH;
+        nightLengthInput.value = CONFIG.NIGHT_LENGTH;
+        updateValueDisplay();
+    };
+
+    setDefaults();
+
+    [mapSizeInput, budgetInput, dayLengthInput, nightLengthInput].forEach(input => {
+        input.addEventListener('input', updateValueDisplay);
+    });
+
+    defaultsButton.addEventListener('click', setDefaults);
+    startButton.addEventListener('click', () => {
+        CONFIG.GRID_SIZE = Number.parseInt(mapSizeInput.value, 10);
+        CONFIG.INITIAL_BUDGET = Number.parseInt(budgetInput.value, 10);
+        CONFIG.DAY_LENGTH = Number.parseInt(dayLengthInput.value, 10);
+        CONFIG.NIGHT_LENGTH = Number.parseInt(nightLengthInput.value, 10);
+
+        try {
+            localStorage.removeItem('isometric_game_state');
+        } catch (error) {
+            console.warn('Failed to clear saved game state:', error);
+        }
+
+        modal.style.display = 'none';
+        if (activeGame) {
+            activeGame.resetForNewConfig();
+        } else {
+            activeGame = new Game();
+        }
+    });
+
+    const openSetupModal = ({ useCurrentValues = false } = {}) => {
+        if (useCurrentValues) {
+            setCurrentValues();
+        } else {
+            setDefaults();
+        }
+        modal.style.display = 'flex';
+    };
+
+    document.addEventListener('game:openSetup', () => {
+        openSetupModal({ useCurrentValues: true });
+    });
+
+    return { openSetupModal };
+}
+
 // Initialize game when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        new Game();
+        initializeSetupModal();
     });
 } else {
-    new Game();
+    initializeSetupModal();
 }
 

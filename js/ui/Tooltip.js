@@ -14,29 +14,6 @@ export class Tooltip {
     createElement() {
         this.element = document.createElement('div');
         this.element.className = 'tooltip';
-        this.element.style.cssText = `
-            position: fixed;
-            pointer-events: none;
-            z-index: 10001;
-            display: none;
-            padding: 10px 14px;
-            background: linear-gradient(180deg, #f5f5f5 0%, #e8e8e8 100%);
-            color: #3d2f1f;
-            border: 3px double #8b8b8b;
-            border-radius: 8px;
-            font-family: 'Kalam', cursive;
-            font-size: 13px;
-            font-weight: 500;
-            box-shadow: 
-                inset 0 2px 4px rgba(0, 0, 0, 0.1),
-                0 4px 12px rgba(0, 0, 0, 0.3);
-            max-width: 300px;
-            word-wrap: break-word;
-            white-space: normal;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        `;
         document.body.appendChild(this.element);
     }
 
@@ -52,21 +29,24 @@ export class Tooltip {
         }
 
         const wasVisible = this.isVisible;
+        const offset = this.getCssNumber('--size-tooltip-offset', 15);
+        const safeOffset = this.getCssNumber('--size-tooltip-safe-offset', 10);
+        const hiddenOffset = this.getCssNumber('--size-tooltip-offset-hidden', -9999);
 
         this.element.textContent = text;
         this.element.style.display = 'block';
         this.isVisible = true;
 
         // Position tooltip near cursor with offset
-        const offsetX = 15;
-        const offsetY = 15;
+        const offsetX = offset;
+        const offsetY = offset;
         
         // Get tooltip dimensions (need to force a layout calculation)
         // If already visible, we can measure directly, otherwise measure off-screen
         if (!wasVisible) {
-            this.element.style.left = '-9999px';
-            this.element.style.top = '-9999px';
-            this.element.style.opacity = '0';
+            this.element.style.left = `${hiddenOffset}px`;
+            this.element.style.top = `${hiddenOffset}px`;
+            this.element.classList.remove('is-visible');
         }
         const rect = this.element.getBoundingClientRect();
         const tooltipWidth = rect.width;
@@ -87,8 +67,8 @@ export class Tooltip {
         }
 
         // Ensure tooltip doesn't go off left or top edges
-        finalX = Math.max(10, finalX);
-        finalY = Math.max(10, finalY);
+        finalX = Math.max(safeOffset, finalX);
+        finalY = Math.max(safeOffset, finalY);
 
         this.element.style.left = finalX + 'px';
         this.element.style.top = finalY + 'px';
@@ -96,9 +76,10 @@ export class Tooltip {
         // Only trigger fade-in animation if tooltip wasn't already visible
         if (!wasVisible) {
             requestAnimationFrame(() => {
-                this.element.style.opacity = '1';
-                this.element.style.transform = 'scale(1)';
+                this.element.classList.add('is-visible');
             });
+        } else {
+            this.element.classList.add('is-visible');
         }
     }
 
@@ -107,9 +88,10 @@ export class Tooltip {
      */
     hide() {
         if (this.element) {
+            const duration = this.getCssDuration('--duration-tooltip', 200);
+
             // Fade out animation
-            this.element.style.opacity = '0';
-            this.element.style.transform = 'scale(0.9)';
+            this.element.classList.remove('is-visible');
             
             // Remove from display after animation
             setTimeout(() => {
@@ -117,8 +99,30 @@ export class Tooltip {
                     this.element.style.display = 'none';
                     this.isVisible = false;
                 }
-            }, 200); // Match transition duration
+            }, duration); // Match transition duration
         }
     }
-}
 
+    getCssNumber(variableName, fallback) {
+        const value = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+        const parsed = Number.parseFloat(value);
+        return Number.isNaN(parsed) ? fallback : parsed;
+    }
+
+    getCssDuration(variableName, fallbackMs) {
+        const value = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+        if (!value) {
+            return fallbackMs;
+        }
+        if (value.endsWith('ms')) {
+            const parsed = Number.parseFloat(value);
+            return Number.isNaN(parsed) ? fallbackMs : parsed;
+        }
+        if (value.endsWith('s')) {
+            const parsed = Number.parseFloat(value);
+            return Number.isNaN(parsed) ? fallbackMs : parsed * 1000;
+        }
+        const parsed = Number.parseFloat(value);
+        return Number.isNaN(parsed) ? fallbackMs : parsed;
+    }
+}

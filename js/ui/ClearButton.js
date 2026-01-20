@@ -22,8 +22,10 @@ export class ClearButton {
         if (this.dialog && this.confirmBtn && this.cancelBtn) {
             // Handle confirm button
             this.confirmBtn.addEventListener('click', () => {
-                this.performReset();
                 this.hideDialog();
+                document.dispatchEvent(new CustomEvent('game:openSetup', {
+                    detail: { reason: 'start-over' }
+                }));
             });
 
             // Handle cancel button

@@ -74,6 +74,56 @@
             </div>
         </div>
     </div>
+
+    <!-- New Game Setup Dialog -->
+    <div id="setup-modal" class="modal-overlay setup-modal">
+        <div class="modal-dialog setup-dialog">
+            <div class="modal-header">
+                <div class="banner-ornament">✦</div>
+                <h3>New Game Setup</h3>
+            </div>
+            <div class="modal-content">
+                <form id="setup-form" class="setup-form">
+                    <div class="setup-field">
+                        <div class="setup-label-row">
+                            <label for="setup-map-size">Map size</label>
+                            <span class="setup-value" id="setup-map-size-value"></span>
+                        </div>
+                        <input type="range" id="setup-map-size" min="20" max="100" step="1">
+                        <div class="setup-help">Tiles per side (20-100)</div>
+                    </div>
+                    <div class="setup-field">
+                        <div class="setup-label-row">
+                            <label for="setup-budget">Initial budget</label>
+                            <span class="setup-value" id="setup-budget-value"></span>
+                        </div>
+                        <input type="range" id="setup-budget" min="1100" max="8000" step="100">
+                        <div class="setup-help">Starting coins (1100-8000)</div>
+                    </div>
+                    <div class="setup-field">
+                        <div class="setup-label-row">
+                            <label for="setup-day-length">Day length</label>
+                            <span class="setup-value" id="setup-day-length-value"></span>
+                        </div>
+                        <input type="range" id="setup-day-length" min="12" max="60" step="1">
+                        <div class="setup-help">Ticks per day (12-60)</div>
+                    </div>
+                    <div class="setup-field">
+                        <div class="setup-label-row">
+                            <label for="setup-night-length">Night length</label>
+                            <span class="setup-value" id="setup-night-length-value"></span>
+                        </div>
+                        <input type="range" id="setup-night-length" min="12" max="60" step="1">
+                        <div class="setup-help">Ticks per night (12-60)</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button id="setup-defaults-btn" class="dialog-btn dialog-btn-cancel" type="button">Use Defaults</button>
+                <button id="setup-start-btn" class="dialog-btn dialog-btn-confirm" type="button">Start Game</button>
+            </div>
+        </div>
+    </div>
     
     <!-- Start Over Confirmation Dialog -->
     <div id="start-over-dialog" class="modal-overlay" style="display: none;">

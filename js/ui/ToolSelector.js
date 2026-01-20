@@ -24,8 +24,7 @@ export class ToolSelector {
         if (this.mouseHandler) {
             this.mouseHandler.disableUIInteraction();
         } else if (this.sidebar) {
-            this.sidebar.style.pointerEvents = 'none';
-            this.sidebar.style.opacity = '0.6';
+            this.sidebar.classList.add('tool-selected');
         }
     }
     
@@ -36,8 +35,7 @@ export class ToolSelector {
         if (this.mouseHandler) {
             this.mouseHandler.enableUIInteraction();
         } else if (this.sidebar) {
-            this.sidebar.style.pointerEvents = 'auto';
-            this.sidebar.style.opacity = '1';
+            this.sidebar.classList.remove('tool-selected');
         }
     }
 
@@ -304,7 +302,7 @@ export class ToolSelector {
             const checkers = this.gameState.getRequirementCheckers();
             
             if (hasContentAfterTitle) addDivider();
-            content += `<div class="info-panel-row" style="margin-top: 4px; padding-top: 8px;"><span class="info-label" style="font-weight: 700;">Requirements:</span></div>`;
+            content += `<div class="info-panel-row info-panel-requirements-header"><span class="info-label">Requirements:</span></div>`;
             
             // Display all requirements dynamically
             for (const [reqType, requiredValue] of Object.entries(requirements)) {
@@ -465,4 +463,3 @@ export class ToolSelector {
         }
     }
 }
-
