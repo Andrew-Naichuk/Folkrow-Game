@@ -126,9 +126,16 @@ export class StatsPanel {
         if (this.timeStatusElement) {
             this.timeStatusElement.textContent = timeInfo.isDay ? 'Day' : 'Night, village resting';
         }
-        
-        // The day and night sections are already sized correctly in CSS
-        // They don't need dynamic updates since the proportions are fixed
+
+        // Update day/night segment widths based on current config
+        const dayWidth = (CONFIG.DAY_LENGTH / cycleLength) * 100;
+        const nightWidth = (CONFIG.NIGHT_LENGTH / cycleLength) * 100;
+        if (this.timeGaugeDay) {
+            this.timeGaugeDay.style.width = `${dayWidth}%`;
+        }
+        if (this.timeGaugeNight) {
+            this.timeGaugeNight.style.width = `${nightWidth}%`;
+        }
     }
 
     /**
