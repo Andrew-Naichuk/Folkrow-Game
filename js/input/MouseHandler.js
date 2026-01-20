@@ -101,7 +101,6 @@ export class MouseHandler {
     disableUIInteraction() {
         if (this.sidebar) {
             this.sidebar.classList.add('tool-selected');
-            this.sidebar.style.opacity = '0.6';
         }
     }
     
@@ -111,7 +110,6 @@ export class MouseHandler {
     enableUIInteraction() {
         if (this.sidebar) {
             this.sidebar.classList.remove('tool-selected');
-            this.sidebar.style.opacity = '1';
         }
     }
     
@@ -121,26 +119,10 @@ export class MouseHandler {
     createCustomCursor() {
         const cursor = document.createElement('div');
         cursor.id = 'custom-cursor';
-        cursor.style.cssText = `
-            position: fixed;
-            width: 16px;
-            height: 16px;
-            pointer-events: none;
-            z-index: 10000;
-            transform: translate(-50%, -50%);
-            display: none;
-        `;
         
         // Create cursor visual (crosshair)
         const cursorInner = document.createElement('div');
-        cursorInner.style.cssText = `
-            width: 100%;
-            height: 100%;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-        `;
+        cursorInner.className = 'custom-cursor-inner';
         cursor.appendChild(cursorInner);
         
         document.body.appendChild(cursor);
@@ -153,7 +135,7 @@ export class MouseHandler {
     updateCustomCursorPosition(clientX, clientY) {
         const selectedTool = this.gameState.getSelectedTool();
         if (!selectedTool || this.isDragging) {
-            this.customCursor.style.display = 'none';
+            this.customCursor.classList.remove('is-visible');
             return;
         }
         
@@ -191,7 +173,7 @@ export class MouseHandler {
         // Position the custom cursor
         this.customCursor.style.left = cursorX + 'px';
         this.customCursor.style.top = cursorY + 'px';
-        this.customCursor.style.display = 'block';
+        this.customCursor.classList.add('is-visible');
     }
 
     setupEventListeners() {
@@ -254,7 +236,7 @@ export class MouseHandler {
                 
                 // Ensure cursor is set to grabbing while dragging
                 this.canvas.style.cursor = 'grabbing';
-                this.customCursor.style.display = 'none';
+                this.customCursor.classList.remove('is-visible');
             } else {
                 // Hide cursor when tool is selected, otherwise show grab cursor
                 if (this.gameState.getSelectedTool()) {
@@ -263,7 +245,7 @@ export class MouseHandler {
                     this.updateCustomCursorPosition(e.clientX, e.clientY);
                 } else {
                     this.canvas.style.cursor = 'grab';
-                    this.customCursor.style.display = 'none';
+                    this.customCursor.classList.remove('is-visible');
                 }
             }
             
@@ -291,7 +273,7 @@ export class MouseHandler {
             } else {
                 this.canvas.style.cursor = 'default';
             }
-            this.customCursor.style.display = 'none';
+            this.customCursor.classList.remove('is-visible');
             // Hide tooltip when leaving canvas
             if (this.tooltip) {
                 this.tooltip.hide();
@@ -308,7 +290,7 @@ export class MouseHandler {
                     this.updateCustomCursorPosition(e.clientX, e.clientY);
                 } else {
                     this.canvas.style.cursor = 'grab';
-                    this.customCursor.style.display = 'none';
+                    this.customCursor.classList.remove('is-visible');
                 }
             }
         });
@@ -487,7 +469,7 @@ export class MouseHandler {
             if (!this.isDragging) {
                 this.canvas.style.cursor = 'grab';
             }
-            this.customCursor.style.display = 'none';
+            this.customCursor.classList.remove('is-visible');
             // Hide tooltip if it was showing demolition cost
             if (this.tooltip && this.hoveredItem) {
                 this.tooltip.hide();
@@ -584,7 +566,7 @@ export class MouseHandler {
     updateCursor() {
         if (this.isDragging) {
             this.canvas.style.cursor = 'grabbing';
-            this.customCursor.style.display = 'none';
+            this.customCursor.classList.remove('is-visible');
         } else if (this.gameState.getSelectedTool()) {
             this.canvas.style.cursor = 'none';
             // Update custom cursor position if we have mouse coordinates
@@ -597,7 +579,7 @@ export class MouseHandler {
             }
         } else {
             this.canvas.style.cursor = 'grab';
-            this.customCursor.style.display = 'none';
+            this.customCursor.classList.remove('is-visible');
         }
     }
     
@@ -614,4 +596,3 @@ export class MouseHandler {
         }
     }
 }
-

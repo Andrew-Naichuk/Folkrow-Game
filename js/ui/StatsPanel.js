@@ -138,11 +138,12 @@ export class StatsPanel {
      */
     updateCanvasBackground() {
         const timeInfo = this.gameState.getTimeCycleInfo();
+        const rootStyles = getComputedStyle(document.documentElement);
         
         // Day color:rgb(41, 105, 64) (green) - peaks at middle of day
-        const dayColor = '#143f24';
+        const dayColor = rootStyles.getPropertyValue('--color-canvas-day').trim() || '#143f24';
         // Night color: #040225 (dark blue) - peaks at middle of night
-        const nightColor = '#030e26';
+        const nightColor = rootStyles.getPropertyValue('--color-canvas-night').trim() || '#030e26';
         
         // Calculate interpolation factor (0 = day color, 1 = night color)
         // Based on distance from phase centers
@@ -216,6 +217,7 @@ export class StatsPanel {
      */
     animateUpdate(incomeAmount) {
         if (!this.budgetElement) return;
+        const incomeDuration = this.getCssDuration('--duration-income-update', 1000);
         
         // Update the budget display
         this.update();
@@ -235,7 +237,23 @@ export class StatsPanel {
             if (incomeIndicator.parentNode) {
                 incomeIndicator.parentNode.removeChild(incomeIndicator);
             }
-        }, 1000);
+        }, incomeDuration);
+    }
+
+    getCssDuration(variableName, fallbackMs) {
+        const value = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+        if (!value) {
+            return fallbackMs;
+        }
+        if (value.endsWith('ms')) {
+            const parsed = Number.parseFloat(value);
+            return Number.isNaN(parsed) ? fallbackMs : parsed;
+        }
+        if (value.endsWith('s')) {
+            const parsed = Number.parseFloat(value);
+            return Number.isNaN(parsed) ? fallbackMs : parsed * 1000;
+        }
+        const parsed = Number.parseFloat(value);
+        return Number.isNaN(parsed) ? fallbackMs : parsed;
     }
 }
-

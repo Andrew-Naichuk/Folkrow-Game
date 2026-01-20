@@ -17,8 +17,7 @@ export class KeyboardHandler {
      */
     enableUIInteraction() {
         if (this.sidebar) {
-            this.sidebar.style.pointerEvents = 'auto';
-            this.sidebar.style.opacity = '1';
+            this.sidebar.classList.remove('tool-selected');
         }
     }
 
@@ -87,4 +86,3 @@ export class KeyboardHandler {
         }
     }
 }
-
